@@ -1,0 +1,7 @@
+{
+  "name": "agroGestor",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
