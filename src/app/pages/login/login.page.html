@@ -38,11 +38,11 @@
 
         <!-- Botón de acción -->
         <ion-button expand="block" shape="round" mode="ios" type="submit" [disabled]="loginFrom.invalid"
-          class="login-button">
+          class="login-button" (click)="login()">
           Ingresar
-        </ion-button>
+        </ion-button>     
       </form>
-      <p>¿Aun no tienes cuenta? <a routerLink="tabs">Regístrate</a></p>
+      <p>¿Aun no tienes cuenta? <a routerLink="sign-up">Regístrate</a></p>
     </ion-card-content>
   </ion-card>
 </ion-content>

@@ -1,20 +1,22 @@
-import { IonicModule } from '@ionic/angular';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Tab2Page } from './tab2.page';
 
-import { Tab2PageRoutingModule } from './tab2-routing.module';
+import { IonicModule } from '@ionic/angular';
+
+import { MainPageRoutingModule } from './main-routing.module';
+
+import { MainPage } from './main.page';
 import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
   imports: [
-    IonicModule,
     CommonModule,
     FormsModule,
-    Tab2PageRoutingModule,
+    IonicModule,
+    MainPageRoutingModule,
     SharedModule
   ],
-  declarations: [Tab2Page]
+  declarations: [MainPage]
 })
-export class Tab2PageModule {}
+export class MainPageModule {}

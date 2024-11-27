@@ -5,14 +5,23 @@
     "mode": "full",
     "tables": [
         {
+            "name": "rol",
+            "schema": [
+                {"column": "id", "value":"INTEGER NOT NULL PRIMARY KEY"},
+                {"column": "nombre", "value": "TEXT NULL" },
+                {"column": "descripccion", "value":"TEXT NULL"}
+            ]
+        },
+        {
             "name": "users",
             "schema": [
                 {"column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+                {"column": "nit", "value":"INTEGER NULL"},
                 {"column": "nombre", "value": "TEXT NULL" },
                 {"column": "apellido", "value": "TEXT NULL" },
-                {"column": "numero", "value": "INTEGER NULL" },
-                {"column": "email", "value":"TEXT NULL" },
-                {"column": "contraseña", "value": "TEXT NULL"}
+                {"column": "celular", "value": "INTEGER NULL" },
+                {"column": "contraseña", "value": "TEXT NULL"},
+                {"column": "rolID", "value": "INTEGER NULL"}
             ]
         }
     ]
