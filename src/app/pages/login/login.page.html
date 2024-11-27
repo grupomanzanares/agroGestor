@@ -1,0 +1,48 @@
+<app-header title="Iniciar Sesión" class="ion-text-center"></app-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-card class="login-card">
+    <ion-card-header>
+      <ion-card-title class="ion-text-center">Bienvenido</ion-card-title>
+      <ion-card-subtitle class="ion-text-center">
+        Ingresa tus credenciales para continuar
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form [formGroup]="loginFrom" (ngSubmit)="login()">
+        <!-- Campo de correo -->
+        <app-custom-input icon="mail-outline" type="email" autocomplete="email" label="Correo"
+          [control]="loginFrom.controls.email"></app-custom-input>
+        <div class="error-message" *ngIf="loginFrom.controls.email.errors && loginFrom.controls.email.touched">
+          <ion-text color="danger">
+            <small *ngIf="loginFrom.controls.email.errors?.['required']">
+              El correo es obligatorio
+            </small>
+            <small *ngIf="loginFrom.controls.email.errors?.['email']">
+              Ingresa un correo válido
+            </small>
+          </ion-text>
+        </div>
+
+        <!-- Campo de contraseña -->
+        <app-custom-input icon="lock-closed-outline" type="password" label="Contraseña"
+          [control]="loginFrom.controls.password"></app-custom-input>
+        <div class="error-message" *ngIf="loginFrom.controls.password.errors && loginFrom.controls.password.touched">
+          <ion-text color="danger">
+            <small *ngIf="loginFrom.controls.password.errors?.['required']">
+              La contraseña es obligatoria
+            </small>
+          </ion-text>
+        </div>
+
+        <!-- Botón de acción -->
+        <ion-button expand="block" shape="round" mode="ios" type="submit" [disabled]="loginFrom.invalid"
+          class="login-button">
+          Ingresar
+        </ion-button>
+      </form>
+      <p>¿Aun no tienes cuenta? <a routerLink="tabs">Regístrate</a></p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

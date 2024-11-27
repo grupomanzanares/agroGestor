@@ -1,0 +1,19 @@
+{
+    "databaase": "agrogestor",
+    "version": 1,
+    "encrypted": false,
+    "mode": "full",
+    "tables": [
+        {
+            "name": "users",
+            "schema": [
+                {"column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+                {"column": "nombre", "value": "TEXT NULL" },
+                {"column": "apellido", "value": "TEXT NULL" },
+                {"column": "numero", "value": "INTEGER NULL" },
+                {"column": "email", "value":"TEXT NULL" },
+                {"column": "contraseña", "value": "TEXT NULL"}
+            ]
+        }
+    ]
+}
