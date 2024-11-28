@@ -29,6 +29,7 @@ export class SqliteManagerService {
   /* Inicializar la base de datos  */
   async init() {
     const info = await Device.getInfo();     /* obtener la información del dispositivo */
+    console.log("info", info)
     const sqlite = CapacitorSQLite as any;   /* objeto sqlite */
 
     if (info.platform == 'android') {         /* si es un Android */
@@ -44,7 +45,9 @@ export class SqliteManagerService {
       }
     } else if (info.platform == 'web') { //web
       this.isWeb = true;
+      console.log("en web")
       await sqlite.initWebStore();  /* inicializar sqlite en plataforma web */
+      
     }
     this.setupDataBase();
   }

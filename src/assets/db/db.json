@@ -21,8 +21,25 @@
                 {"column": "apellido", "value": "TEXT NULL" },
                 {"column": "celular", "value": "INTEGER NULL" },
                 {"column": "contraseña", "value": "TEXT NULL"},
-                {"column": "rolID", "value": "INTEGER NULL"}
+                {"column": "rolID", "value": "INTEGER NULL", "foreignkey": "rol(id)" }
             ]
+        },
+        {
+          "name": "finca",
+          "schema": [
+            { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+            { "column": "nombre", "value": "TEXT NOT NULL"},
+            { "column": "descripcion", "value": "TEXT NULL"},
+            { "column": "sigla", "value": "TEXT NOT NULL"},
+            { "column": "ccosto", "value": "TEXT NOT NULL"},
+            { "column": "municipio", "value": "TEXT NOT NULL"},
+            { "column": "imagen", "value": "TEXT NOT NULL"},
+            { "column": "habilitado", "value":"INTEGER"},
+            { "column": "usuario", "value":"TEXT NULL"},
+            { "column": "usuarioMod", "value":"TEXT NULL"},
+            { "column": "createdAt", "value":"TEXT NULL"},
+            { "column": "updatedAt", "value":"TEXT NULL"}
+          ]
         }
     ]
 }

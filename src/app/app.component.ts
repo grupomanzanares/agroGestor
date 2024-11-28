@@ -27,6 +27,7 @@ export class AppComponent {
         // if (this.load) {
         //   this.cargarContratos();
         // }
+
       })
     })
   }

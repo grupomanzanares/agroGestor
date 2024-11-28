@@ -5,25 +5,19 @@ import { MainPage } from './main.page';
 
 const routes: Routes = [
   {
-    path: 'main',
+    path: '',
     component: MainPage,
-    children: [
+    children:[
       {
         path: 'actividades',
-        loadChildren: () => import('./actividades/actividades.module').then( m => m.ActividadesPageModule)
+        loadChildren: ()=> import('./actividades/actividades.module').then(m => m.ActividadesPageModule)
       },
       {
-        path: '',
-        redirectTo: '/main/actividades',
-        pathMatch: 'full'
+        path: 'sincronizar',
+        loadChildren: () => import('./sincronizar/sincronizar.module').then( m => m.SincronizarPageModule)
       }
     ]
   },
-  {
-    path: '',
-    redirectTo: '/main/actividades',
-    pathMatch: 'full'
-  }
 ];
 
 @NgModule({

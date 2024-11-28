@@ -27,7 +27,7 @@ export class LoginPage implements OnInit {
 
     if (email === 'usuario@ejemplo.com' && password === '123456') {
       // Usuario registrado, redirigir a la página principal
-      this.router.navigate(['/main']);
+      this.router.navigateByUrl('main/actividades');
     } else {
       // Usuario no registrado, mostrar un mensaje de error
       alert('Usuario no registrado o credenciales incorrectas.');
