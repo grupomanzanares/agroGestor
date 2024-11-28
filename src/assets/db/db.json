@@ -1,5 +1,5 @@
 {
-    "databaase": "agrogestor",
+    "database": "agrogestor",
     "version": 1,
     "encrypted": false,
     "mode": "full",
@@ -9,7 +9,7 @@
             "schema": [
                 {"column": "id", "value":"INTEGER NOT NULL PRIMARY KEY"},
                 {"column": "nombre", "value": "TEXT NULL" },
-                {"column": "descripccion", "value":"TEXT NULL"}
+                {"column": "descripcion", "value":"TEXT NULL"}
             ]
         },
         {
@@ -25,21 +25,21 @@
             ]
         },
         {
-          "name": "finca",
-          "schema": [
-            { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
-            { "column": "nombre", "value": "TEXT NOT NULL"},
-            { "column": "descripcion", "value": "TEXT NULL"},
-            { "column": "sigla", "value": "TEXT NOT NULL"},
-            { "column": "ccosto", "value": "TEXT NOT NULL"},
-            { "column": "municipio", "value": "TEXT NOT NULL"},
-            { "column": "imagen", "value": "TEXT NOT NULL"},
-            { "column": "habilitado", "value":"INTEGER"},
-            { "column": "usuario", "value":"TEXT NULL"},
-            { "column": "usuarioMod", "value":"TEXT NULL"},
-            { "column": "createdAt", "value":"TEXT NULL"},
-            { "column": "updatedAt", "value":"TEXT NULL"}
-          ]
+            "name": "finca",
+            "schema": [
+                { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "nombre", "value": "TEXT NOT NULL"},
+                { "column": "descripcion", "value": "TEXT NULL"},
+                { "column": "sigla", "value": "TEXT NOT NULL"},
+                { "column": "ccosto", "value": "TEXT NOT NULL"},
+                { "column": "municipio", "value": "TEXT NOT NULL"},
+                { "column": "imagen", "value": "TEXT NOT NULL"},
+                { "column": "habilitado", "value":"INTEGER"},
+                { "column": "usuario", "value":"TEXT NULL"},
+                { "column": "usuarioMod", "value":"TEXT NULL"},
+                { "column": "createdAt", "value":"TEXT NULL"},
+                { "column": "updatedAt", "value":"TEXT NULL"}
+            ]
         }
     ]
 }

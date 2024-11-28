@@ -1,4 +1,4 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 
@@ -7,8 +7,11 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
-import { defineCustomElements as jeepSqlite} from 'jeep-sqlite/loader'
+import { defineCustomElements as jeepSqlite } from 'jeep-sqlite/loader'
 import { HttpClientModule } from '@angular/common/http';
+
+
+jeepSqlite(window)
 
 @NgModule({
   declarations: [AppComponent],

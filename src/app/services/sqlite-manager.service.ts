@@ -45,14 +45,13 @@ export class SqliteManagerService {
       }
     } else if (info.platform == 'web') { //web
       this.isWeb = true;
-      console.log("en web")
       await sqlite.initWebStore();  /* inicializar sqlite en plataforma web */
-      
     }
     this.setupDataBase();
   }
 
   async setupDataBase() {
+    console.log("entro a setupdatabase")
     const dbSetupDone = await Preferences.get({ key: this.DB_SETUP_KEY })
     console.log("dbSetupDone.value:", dbSetupDone.value);
 
