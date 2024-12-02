@@ -220,5 +220,4 @@ export class FincaService {
       console.error('Error en la sincronización:', error);
     }
   }
-
 }

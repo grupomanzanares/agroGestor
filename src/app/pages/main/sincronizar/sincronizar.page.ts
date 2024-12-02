@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FincaService } from 'src/app/services/finca.service';
+import { UsersService } from 'src/app/services/users.service';
 
 @Component({
   selector: 'app-sincronizar',
@@ -9,8 +10,10 @@ import { FincaService } from 'src/app/services/finca.service';
 export class SincronizarPage implements OnInit {
 
   fincas: { id: number, nombre: string }[] = [];
+  users: { id: number, name: string }[] = [];
 
-  constructor(private fincaService: FincaService) { }
+
+  constructor(private fincaService: FincaService, private usersService: UsersService) { }
 
   ngOnInit() {
   }
@@ -18,6 +21,8 @@ export class SincronizarPage implements OnInit {
   async cargar() {
     try {
       const finca = await this.fincaService.obtenerDtLocal('finca')
+      const user = await this.usersService.obtenerDtLocal('users')
+      this.users = (user)
 
       this.fincas = (finca)
     } catch (error) {
@@ -28,11 +33,11 @@ export class SincronizarPage implements OnInit {
   async traerDatos() {
     try {
       await this.fincaService.sicronizarFinca('finca', 'finca')
+      await this.usersService.sincronizarUsers('users', 'users')
       await this.cargar()
       console.log('Sincronizacion completada exitosamente');
     } catch (error) {
       console.error('Error en la sincronizacion:', error)
     }
   }
-
 }

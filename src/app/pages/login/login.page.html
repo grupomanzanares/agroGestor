@@ -12,15 +12,21 @@
     <ion-card-content>
       <form [formGroup]="loginFrom" (ngSubmit)="login()">
         <!-- Campo de correo -->
-        <app-custom-input icon="mail-outline" type="email" autocomplete="email" label="Correo"
-          [control]="loginFrom.controls.email"></app-custom-input>
-        <div class="error-message" *ngIf="loginFrom.controls.email.errors && loginFrom.controls.email.touched">
+        <app-custom-input icon="person-outline" type="nit" autocomplete="nit" label="Cedula De Ciudadania"
+          [control]="loginFrom.controls.nit"></app-custom-input>
+        <div class="error-message" *ngIf="loginFrom.controls.nit.errors && loginFrom.controls.nit.touched">
           <ion-text color="danger">
-            <small *ngIf="loginFrom.controls.email.errors?.['required']">
-              El correo es obligatorio
+            <small *ngIf="loginFrom.controls.nit.errors?.['required']">
+              La Cedula es obligatoria
             </small>
-            <small *ngIf="loginFrom.controls.email.errors?.['email']">
-              Ingresa un correo válido
+            <small *ngIf="loginFrom.controls.nit.errors?.['minlength']">
+              La cedula deve tener al menos 8 caracteres
+            </small>
+            <small *ngIf="loginFrom.controls.nit.errors?.['maxlength']">
+              La cedula deve tener maximo 10 caracteres
+            </small>
+            <small *ngIf="loginFrom.controls.nit.errors?.['pattern']">
+              La cedula deve contener solo numeros
             </small>
           </ion-text>
         </div>
@@ -40,9 +46,9 @@
         <ion-button expand="block" shape="round" mode="ios" type="submit" [disabled]="loginFrom.invalid"
           class="login-button" (click)="login()">
           Ingresar
-        </ion-button>     
+        </ion-button>
       </form>
-      <p>¿Aun no tienes cuenta? <a routerLink="main">Regístrate</a></p>
+      <p>¿Aun no tienes cuenta? <a routerLink="sign">Regístrate</a></p>
     </ion-card-content>
   </ion-card>
 </ion-content>

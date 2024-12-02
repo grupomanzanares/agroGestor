@@ -24,10 +24,6 @@ export class AppComponent {
       this.sqliteService.init();
       this.sqliteService.dbReady.subscribe(isReady =>{
         this.load = isReady;
-        // if (this.load) {
-        //   this.cargarContratos();
-        // }
-
       })
     })
   }

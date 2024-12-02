@@ -12,4 +12,8 @@ export class ActividadesPage implements OnInit {
   ngOnInit() {
   }
 
+  createUser(){
+    
+  }
+
 }

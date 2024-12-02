@@ -16,12 +16,15 @@
             "name": "users",
             "schema": [
                 {"column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
-                {"column": "nit", "value":"INTEGER NULL"},
-                {"column": "nombre", "value": "TEXT NULL" },
-                {"column": "apellido", "value": "TEXT NULL" },
-                {"column": "celular", "value": "INTEGER NULL" },
-                {"column": "contraseña", "value": "TEXT NULL"},
-                {"column": "rolID", "value": "INTEGER NULL", "foreignkey": "rol(id)" }
+                {"column": "identificacion", "value":"INTEGER NULL"},
+                {"column": "name", "value": "TEXT NULL" },
+                {"column": "email", "value": "TEXT NULL" },
+                {"column": "celphone", "value": "INTEGER NULL" },
+                {"column": "password", "value": "TEXT NULL"},
+                {"column": "state", "value":"INTEGER NULL"},
+                {"column": "createdAt", "value":"TEXT NULL"},
+                {"column": "updatedAt", "value":"TEXT NULL"},
+                {"column": "rolId", "value": "INTEGER NULL", "foreignkey": "rolId(id)" }
             ]
         },
         {

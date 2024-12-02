@@ -5,6 +5,8 @@ import { Device } from '@capacitor/device';
 import { Preferences } from '@capacitor/preferences';
 import { AlertController } from '@ionic/angular';
 import { BehaviorSubject } from 'rxjs';
+import { UsersService } from './users.service';
+import { Users } from '../models/users';
 
 
 @Injectable({
@@ -17,10 +19,10 @@ export class SqliteManagerService {
   private DB_NAME_KEY = 'db_name'           /** Para crear una vriable Alamcenamiento local  */
   private dbName: string;
   public dbReady: BehaviorSubject<boolean>;
-  
-  constructor(private alertCtrl: AlertController,
-    private http: HttpClient) {
 
+  public users: Users[]
+  
+  constructor(private alertCtrl: AlertController, private http: HttpClient) {
     this.isWeb = false;
     this.dbName = '';
     this.dbReady = new BehaviorSubject(false);      /**  Esta siempre escuchando BehaviorSubject */
@@ -48,6 +50,7 @@ export class SqliteManagerService {
       await sqlite.initWebStore();  /* inicializar sqlite en plataforma web */
     }
     this.setupDataBase();
+
   }
 
   async setupDataBase() {
@@ -97,5 +100,40 @@ export class SqliteManagerService {
     }
     return this.dbName;
   }
+
+  async getUsers(): Promise<Users[]> {
+    const db = await this.getDbName();
+    const sql = `SELECT * FROM users`;
+  
+    try {
+      const response = await CapacitorSQLite.query({
+        database: db,
+        statement: sql,
+        values: []
+      });
+  
+      if (response.values && response.values.length > 0) {
+        const users: Users[] = response.values.map(row => ({
+          id: row.id,
+          identificacion: row.identificacion,
+          name: row.name,
+          email: row.email,
+          celphone: row.celphone,
+          password: row.password,
+          state: row.state,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          rolId: row.rolId,
+        }));
+        return users;
+      } else {
+        console.warn('No se encontraron usuarios en la base de datos.');
+        return [];
+      }
+    } catch (error) {
+      console.error('Error al consultar los usuarios desde SQLite:', error);
+      throw error;
+    }
+  }  
 
 }
