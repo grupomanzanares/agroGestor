@@ -12,6 +12,8 @@ import { CapacitorSQLite } from '@capacitor-community/sqlite';
 export class UsersService {
 
   apiUrl = environment.apiUrl
+  public token: string | null = null;
+  private credentials: { identificacion: number; password: string } | null = null;
 
   constructor(private http: HttpClient, private sqlManagerService: SqliteManagerService) { }
 
@@ -183,6 +185,43 @@ export class UsersService {
 
       console.error('Error al crear nuevos datos:', error)
     }
+  }
+
+  async geneToken(identificacion: number, password: string): Promise<string> {
+    const url = `${this.apiUrl}auth/generate-token`; // Cambia '/auth/token' por el endpoint real de tu API
+    const body = { identificacion, password };
+
+    try {
+      const response = await lastValueFrom(
+        this.http.post<{ token: string }>(url, body)
+      );
+      if (response && response.token) {
+        this.token = response.token; // Almacena el token en la variable privada
+        console.log('Token generado y almacenado exitosamente:');
+        return this.token;
+      } else {
+        throw new Error('No se recibió un token en la respuesta.');
+      }
+    } catch (error) {
+      console.error('Error al generar el token:', error);
+      throw new Error('Error al generar el token. Verifica las credenciales.');
+    }
+  }
+
+  getToken(): string | null {
+    return this.token; // Método para acceder al token
+  }
+
+  clearToken(): void {
+    this.token = null; // Método para limpiar el token
+  }
+
+  setCredentials(credentials: { identificacion: number; password: string }): void {
+    this.credentials = credentials;
+  }
+
+  getCredentials(): { identificacion: number; password: string } | null {
+    return this.credentials;
   }
 
   async sincronizarUsers(endPoint: string, tabla: string) {

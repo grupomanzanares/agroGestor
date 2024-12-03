@@ -32,12 +32,27 @@ export class SincronizarPage implements OnInit {
 
   async traerDatos() {
     try {
-      await this.fincaService.sicronizarFinca('finca', 'finca')
-      await this.usersService.sincronizarUsers('users', 'users')
-      await this.cargar()
-      console.log('Sincronizacion completada exitosamente');
+      // Verificar si el token ya está disponible
+      const token = this.usersService.getCredentials();
+
+      if (!token) {
+        console.error('No se encontró un token. Asegúrate de que el usuario haya iniciado sesión.');
+        return;
+      }
+
+      if (!this.usersService.token) {
+        console.log('Generando token')
+        await this.usersService.geneToken(token.identificacion, token.password)
+        console.log('Token generado')
+      }
+ 
+      // Sincronizar datos usando el token ya existente
+      await this.fincaService.sicronizarFinca('finca', 'finca');
+      await this.usersService.sincronizarUsers('users', 'users');
+      await this.cargar();
+      console.log('Sincronización completada exitosamente.');
     } catch (error) {
-      console.error('Error en la sincronizacion:', error)
+      console.error('Error en la sincronización:', error);
     }
   }
 }

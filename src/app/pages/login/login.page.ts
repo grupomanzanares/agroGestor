@@ -24,8 +24,8 @@ export class LoginPage implements OnInit {
 
   ionViewWillEnter() {
     setTimeout(async () => {
-      await this.traerDatos(); 
-      // await this.getUsers(); 
+      // await this.traerDatos(); 
+      await this.getUsers(); 
     }, 1000);
   }
 
@@ -58,19 +58,32 @@ export class LoginPage implements OnInit {
     }
   }
 
-  login() {
+  async login() {
     const { nit, password } = this.loginFrom.value;
-
+  
     if (this.users.length === 0) {
       alert('No hay usuarios disponibles. Por favor, sincronice los datos.');
       return;
     }
-
+  
+    // Buscar usuario en la base de datos local
     const usuarioEncontrado = this.users.find(user => user.identificacion === Number(nit) && user.password === password);
+  
     if (usuarioEncontrado) {
-      this.router.navigateByUrl('main/actividades');
+      try {
+        // Almacenar las credenciales en UsersService para generar el token más tarde
+        this.usersService.setCredentials({ identificacion: nit, password });
+  
+        // Redirigir al usuario o realizar otras acciones necesarias
+        console.log('Credenciales almacenadas para sincronización.');
+        this.router.navigateByUrl('main/actividades');
+      } catch (error) {
+        console.error('Error durante el proceso de login:', error);
+      }
     } else {
-      this.alertService.alertMenssage('Exelente', 'Usuario aunteticado con exito');
+      // Si las credenciales no coinciden, mostrar un mensaje de error
+      this.alertService.alertMenssage('Error', 'Credenciales incorrectas. Inténtalo de nuevo.');
     }
   }
+  
 }

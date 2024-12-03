@@ -25,6 +25,20 @@
                 {"column": "createdAt", "value":"TEXT NULL"},
                 {"column": "updatedAt", "value":"TEXT NULL"},
                 {"column": "rolId", "value": "INTEGER NULL", "foreignkey": "rolId(id)" }
+            ],
+            "values": [
+                [
+                    3,
+                    2,
+                    "Samir Ariza",
+                    "samArz@gmail.com",
+                    3202676640,
+                    "1234",
+                    1,
+                    "2024-10-11T12:55:26.000Z",
+                    "2024-10-11T12:55:26.000Z",
+                    1
+                ]
             ]
         },
         {
