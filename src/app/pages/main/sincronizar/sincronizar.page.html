@@ -1,22 +1,58 @@
 <app-header title="Sincronizacion" class="ion-text-center"></app-header>
 
 <ion-content [fullscreen]="true">
-  <div class="ion-text-center sync-button">
+  <div class="ion-text-center ion-padding">
     <ion-button size="large" expand="block" color="success" (click)="traerDatos()">
       <ion-icon name="cloud-download-outline" slot="start"></ion-icon>
-      sincronización
+      Sincronización
     </ion-button>
 
-    <ion-list>
-      <ion-item *ngFor="let datos of fincas">
-        {{ datos.nombre }} (ID: {{ datos.id }})
-      </ion-item>
-    </ion-list>
+    <!-- Tabla para las fincas -->
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of fincas">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-    <ion-list>
-      <ion-item *ngFor="let datos of users">
-        <ion-label>{{ datos.id }} {{ datos.name }}</ion-label>
-      </ion-item>
-    </ion-list>
+    <!-- Tabla para los usuarios -->
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of users">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.name }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Tabla para las sucursales -->
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of sucursales">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table> 
   </div>
 </ion-content>

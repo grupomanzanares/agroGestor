@@ -3,10 +3,10 @@
 <ion-content [fullscreen]="true" class="ion-padding">
   <ion-card class="login-card">
     <ion-card-header>
-      <ion-card-title class="ion-text-center">Bienvenido</ion-card-title>
-      <ion-card-subtitle class="ion-text-center">
+      <!-- <ion-card-title class="ion-text-center">Bienvenido</ion-card-title> -->
+      <!-- <ion-card-subtitle class="ion-text-center">
         Ingresa tus credenciales para continuar
-      </ion-card-subtitle>
+      </ion-card-subtitle> -->
     </ion-card-header>
 
     <ion-card-content>
@@ -32,7 +32,7 @@
         </div>
 
         <!-- Campo de contraseña -->
-        <app-custom-input icon="lock-closed-outline" type="password" label="Contraseña"
+        <app-custom-input icon="lock-closed-outline" class="ion-margin" type="password" label="Contraseña"
           [control]="loginFrom.controls.password"></app-custom-input>
         <div class="error-message" *ngIf="loginFrom.controls.password.errors && loginFrom.controls.password.touched">
           <ion-text color="danger">
@@ -48,7 +48,6 @@
           Ingresar
         </ion-button>
       </form>
-      <p>¿Aun no tienes cuenta? <a routerLink="sign">Regístrate</a></p>
     </ion-card-content>
   </ion-card>
 </ion-content>

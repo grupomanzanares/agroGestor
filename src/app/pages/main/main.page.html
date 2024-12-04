@@ -1,4 +1,4 @@
-<ion-tabs>
+<!-- <ion-tabs>
 
   <ion-tab-bar slot="bottom">
     <ion-tab-button tab="actividades" routerLink="actividades">
@@ -17,4 +17,145 @@
     </ion-tab-button>
   </ion-tab-bar>
 
-</ion-tabs>
+</ion-tabs> -->
+
+<!-- 
+<ion-content>
+  <ion-card class="menu-card">
+    <app-header title="Menú"></app-header>
+    
+    <ion-card class="ion-margin activi">
+      <ion-card-header>
+        <ion-card-title>Actividades</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" routerLink="actividades">
+          <ion-icon name="people-outline" slot="start"></ion-icon>
+          <ion-label>Ver Actividades</ion-label>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="ion-margin">
+      <ion-card-header>
+        <ion-card-title>Sincronización</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" routerLink="sincronizar">
+          <ion-icon name="cloud-outline" slot="start"></ion-icon>
+          <ion-label>Ir a Sincronización</ion-label>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+    
+    <ion-card class="ion-margin">
+      <ion-card-header>
+        <ion-card-title>Recolección</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" routerLink="recoleccion">
+          <ion-icon name="construct-outline" slot="start"></ion-icon>
+          <ion-label>Ir a Recolección</ion-label>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ion-card>
+</ion-content> -->
+
+<!-- 
+<ion-content>
+  <ion-card class="menu-card">
+    <app-header title="Menú"></app-header>
+    <ion-card class="ion-margin activi">
+      <ion-card-header>
+        <ion-card-title>Actividades</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" routerLink="actividades" (click)="buttonClicked('Sincronización')">
+          <ion-icon name="people-outline" slot="start"></ion-icon>
+          <ion-label>Ver Actividades</ion-label>
+        </ion-button>
+      </ion-card-content>
+
+      <ion-card-header>
+        <ion-card-title>Sincronización</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" routerLink="sincronizar" (click)="buttonClicked('Sincronización')">
+          <ion-icon name="cloud-outline" slot="start"></ion-icon>
+          <ion-label>Ir a Sincronización</ion-label>
+        </ion-button>
+      </ion-card-content>
+    
+      <ion-card-header>
+        <ion-card-title>Recolección</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" routerLink="recoleccion" (click)="buttonClicked('Sincronización')">
+          <ion-icon name="construct-outline" slot="start"></ion-icon>
+          <ion-label>Ir a Recolección</ion-label>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ion-card>
+  
+  <ion-card class="ion-margin">
+    <ion-card-header>
+      <ion-card-title>Botón Seleccionado</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ selectedButton ? 'Seleccionaste: ' + selectedButton : 'Ningún botón seleccionado' }}</p>
+    </ion-card-content>
+  </ion-card>
+  
+</ion-content> -->
+
+<ion-content>
+  <ion-card class="menu-card">
+    <app-header title="Menú Principal"></app-header>
+
+    <!-- Tarjeta: Actividades -->
+    <ion-card class="ion-margin activi">
+      <ion-card-header>
+        <ion-card-title>Actividades</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" (click)="navigateTo('actividades')">
+          <ion-icon name="people-outline" slot="start"></ion-icon>
+          <ion-label>Ver Actividades</ion-label>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Tarjeta: Sincronización -->
+    <ion-card class="ion-margin activi">
+      <ion-card-header>
+        <ion-card-title>Sincronización</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" (click)="navigateTo('sincronizar')">
+          <ion-icon name="cloud-outline" slot="start"></ion-icon>
+          <ion-label>Ir a Sincronización</ion-label>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Tarjeta: Recolección -->
+    <ion-card class="ion-margin activi">
+      <ion-card-header>
+        <ion-card-title>Recolección</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" (click)="navigateTo('recoleccion')">
+          <ion-icon name="construct-outline" slot="start"></ion-icon>
+          <ion-label>Ir a Recolección</ion-label>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="ion-margin">
+      <a href="#">ir a</a>
+    </ion-card>
+
+  </ion-card>
+</ion-content>

@@ -1,0 +1,66 @@
+.sync-table {
+    width: 80%;
+    border-collapse: collapse;
+    margin: 70px auto;
+    font-size: 0.9em;
+    min-width: 400px;
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.sync-table thead tr {
+    background-color: #00a4f3; /* Color de fondo del encabezado */
+    color: #ffffff; /* Color del texto del encabezado */
+    font-weight: bold;
+}
+
+.sync-table th,
+.sync-table td {
+    padding: 12px 15px;
+}
+
+.sync-table tbody {
+    text-align: center;
+}
+
+.sync-table tbody tr {
+    border-bottom: 1px solid #6f6666; /* Líneas divisorias dinámicas */
+}
+
+.sync-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3; /* Color alterno para filas pares */
+}
+
+.sync-table tbody tr:last-of-type {
+    border-bottom: 2px solid #05a786; /* Línea inferior más gruesa */
+}
+
+.sync-table tbody tr:hover {
+    background-color: #f1f1f1; /* Color al pasar el ratón */
+}
+
+.sync-table tbody tr.active-row {
+    font-weight: bold;
+    color: #05a786; /* Color para resaltar una fila activa */
+}
+
+/* Media Queries para Pantallas Pequeñas */
+@media screen and (max-width: 768px) {
+    .sync-table {
+        width: 100%; /* La tabla ocupa todo el ancho disponible */
+        margin: 20px 0; /* Margen más pequeño */
+        font-size: 0.8em; /* Texto más pequeño */
+        min-width: auto; /* Sin ancho mínimo */
+    }
+
+    .sync-table tbody tr:nth-of-type(even) {
+        background-color: transparent; /* Quita color alterno */
+    }
+
+    .sync-table td {
+        padding: 10px 5px;
+        border-bottom: 1px solid #dddddd; /* Línea entre celdas */
+    }
+
+}

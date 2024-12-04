@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FincaService } from 'src/app/services/finca.service';
+import { SucursalService } from 'src/app/services/sucursal.service';
 import { UsersService } from 'src/app/services/users.service';
 
 @Component({
@@ -11,9 +12,10 @@ export class SincronizarPage implements OnInit {
 
   fincas: { id: number, nombre: string }[] = [];
   users: { id: number, name: string }[] = [];
+  sucursales: { id: number, nombre: string }[] = [];
 
 
-  constructor(private fincaService: FincaService, private usersService: UsersService) { }
+  constructor(private fincaService: FincaService, private usersService: UsersService, private sucursalService: SucursalService) { }
 
   ngOnInit() {
   }
@@ -22,9 +24,10 @@ export class SincronizarPage implements OnInit {
     try {
       const finca = await this.fincaService.obtenerDtLocal('finca')
       const user = await this.usersService.obtenerDtLocal('users')
+      const sucursal = await this.sucursalService.obtenerLocal('sucursal')
       this.users = (user)
-
       this.fincas = (finca)
+      this.sucursales = (sucursal)
     } catch (error) {
       console.error('Error al cargar los datos locales:', error)
     }
@@ -49,6 +52,7 @@ export class SincronizarPage implements OnInit {
       // Sincronizar datos usando el token ya existente
       await this.fincaService.sicronizarFinca('finca', 'finca');
       await this.usersService.sincronizarUsers('users', 'users');
+      await this.sucursalService.sincronizar('sucursal', 'sucursal');
       await this.cargar();
       console.log('Sincronización completada exitosamente.');
     } catch (error) {

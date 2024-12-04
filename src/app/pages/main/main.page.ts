@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 export class MainPage implements OnInit {
 
   currentPath: string = '';
+  selectedButton: string = '';
 
   constructor(private router: Router) { }
 
@@ -16,6 +17,14 @@ export class MainPage implements OnInit {
     this.router.events.subscribe((event: any) => {
       if(event?.url) this.currentPath = event.url
     })
+  }
+
+  buttonClicked(buttonName: string): void {
+    this.selectedButton = buttonName;
+  }
+
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
   }
 
 }

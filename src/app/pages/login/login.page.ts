@@ -76,7 +76,9 @@ export class LoginPage implements OnInit {
   
         // Redirigir al usuario o realizar otras acciones necesarias
         console.log('Credenciales almacenadas para sincronización.');
-        this.router.navigateByUrl('main/actividades');
+        // this.router.navigateByUrl('main/actividades');
+        this.router.navigateByUrl('main');
+
       } catch (error) {
         console.error('Error durante el proceso de login:', error);
       }
