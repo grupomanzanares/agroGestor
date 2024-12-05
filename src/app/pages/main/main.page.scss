@@ -1,37 +1,35 @@
-.activi{
-    transition: all 0.3s ease-in-out;
+.activi {
+  transition: all 0.3s ease-in-out;
+  margin-top: 40px;
+  margin-bottom: 30px;
 }
 
-.activi:hover{
-    transform: scale(1) translateY(-10px);
-    opacity: 0.8; /* Reduce la opacidad */
+.activi:hover {
+  transform: scale(1) translateY(-10px);
+  opacity: 0.8;
+  /* Reduce la opacidad */
 }
-.menu-container {
-    display: flex;
-    justify-content: space-around; /* Espacio uniforme entre las tarjetas */
-    align-items: center; /* Alinea verticalmente las tarjetas */
-    flex-wrap: wrap; /* Permite que las tarjetas bajen de línea en pantallas pequeñas */
-    padding: 20px;
-    gap: 15px; /* Espaciado entre tarjetas */
-  }
-  
-  .menu-card {
-    width: 300px; /* Ancho de las tarjetas */
-    height: auto; /* Ajusta la altura según el contenido */
-    text-align: center; /* Centra el contenido */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para el efecto */
-    border-radius: 10px; /* Bordes redondeados */
-  }
-  
-  ion-card-title {
-    font-size: 1.2rem; /* Tamaño del texto del título */
-    font-weight: bold;
-  }
-  
-  ion-button {
-    --background: #0057ff; /* Color de fondo del botón */
-    --color: white; /* Color del texto */
-    border-radius: 8px; /* Bordes redondeados */
-    font-size: 1rem; /* Tamaño del texto del botón */
-  }
-  
+
+.menu-card {
+  // width: 80%;
+  /* Ancho de las tarjetas */
+  // height: auto;
+  /* Ajusta la altura según el contenido */
+  text-align: center;
+  /* Centra el contenido */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Sombra para el efecto */
+  border-radius: 10px;
+  /* Bordes redondeados */
+}
+
+ion-button {
+  --background: #047066;
+  /* Color de fondo del botón */
+  --color: white;
+  /* Color del texto */
+  border-radius: 8px;
+  /* Bordes redondeados */
+  font-size: 1rem;
+  /* Tamaño del texto del botón */
+}
