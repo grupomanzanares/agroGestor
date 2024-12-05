@@ -54,5 +54,51 @@
         </tr>
       </tbody>
     </table> 
+
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of unidades">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table> 
+
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of categorias">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table> 
+
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of subcategorias">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table> 
+
   </div>
 </ion-content>
