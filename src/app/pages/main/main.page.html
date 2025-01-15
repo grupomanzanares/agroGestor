@@ -1,36 +1,21 @@
-<ion-tabs>
-
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="actividades" routerLink="actividades">
-      <ion-icon name="people-outline"></ion-icon>
-      <ion-label>Actividades</ion-label>
-    </ion-tab-button>
-
-    <ion-tab-button tab="#" href="#">
-      <ion-icon name="construct-outline"></ion-icon>
-      <ion-label>Recoleccion</ion-label>
-    </ion-tab-button>
-
-    <ion-tab-button tab="sincronizar" routerLink="sincronizar">
-      <ion-icon name="cloud-outline"></ion-icon>
-      <ion-label>Sincronizacion</ion-label>
-    </ion-tab-button>
-  </ion-tab-bar>
-
-</ion-tabs>
-
-<!-- <ion-content>
+<ion-content>
+  <div class="logout-button-container">
+    <ion-button (click)="logout()" color="danger" class="logout-button">
+      <ion-icon name="log-out-outline" size="large" slot="end"></ion-icon>
+      Cerrar sesión
+    </ion-button>
+  </div>
   <ion-card class="menu-card">
     <app-header title="Menú Principal"></app-header>
 
     <ion-card class="activi">
       <ion-card-header>
-        <ion-card-title>Actividades</ion-card-title>
+        <ion-card-title>Programacion</ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <ion-button id="actividades" expand="block" (click)="navigateTo($event)">
           <ion-icon name="people-outline" slot="start"></ion-icon>
-          <ion-label>Ver Actividades</ion-label>
+          <ion-label>Ver Programacion</ion-label>
         </ion-button>
       </ion-card-content>
     </ion-card>
@@ -59,4 +44,4 @@
       </ion-card-content>
     </ion-card>
   </ion-card>
-</ion-content> -->
+</ion-content>

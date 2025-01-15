@@ -33,3 +33,9 @@ ion-button {
   font-size: 1rem;
   /* Tamaño del texto del botón */
 }
+
+.logout-button-container {
+  display: flex;
+  justify-content: flex-end; /* Alinear el botón a la derecha */
+  padding: 10px; /* Espaciado interno */
+}

@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -6,9 +7,16 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent implements OnInit {
-  @Input() title: string
-  constructor() { }
+  @Input() title: string;
+  @Input() showback: boolean = false;
+  constructor(private router: Router) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    console.log(this.showback)
+  }
+
+  menu(){
+    this.router.navigate(['/main'])
+  }
 
 }

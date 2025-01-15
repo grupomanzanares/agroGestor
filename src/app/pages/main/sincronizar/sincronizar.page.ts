@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { ActividadService } from 'src/app/services/actividad.service';
 import { CategoriaService } from 'src/app/services/categoria.service';
 import { FincaService } from 'src/app/services/finca.service';
 import { SubcategoriaService } from 'src/app/services/subcategoria.service';
 import { SucursalService } from 'src/app/services/sucursal.service';
+import { ToastService } from 'src/app/services/toast.service';
 import { UnidadService } from 'src/app/services/unidad.service';
 import { UsersService } from 'src/app/services/users.service';
 
@@ -19,6 +21,7 @@ export class SincronizarPage implements OnInit {
   unidades: { id: number, nombre: string }[] = [];
   categorias: { id: number, nombre: string }[] = [];
   subcategorias: { id: number, nombre: string }[] = [];
+  actividades: {id: number, nombre: string} [] = []
 
 
   constructor(
@@ -27,7 +30,9 @@ export class SincronizarPage implements OnInit {
     private sucursalService: SucursalService,
     private unidadService: UnidadService,
     private categoriaService: CategoriaService,
-    private subcategoriaService: SubcategoriaService
+    private subcategoriaService: SubcategoriaService,
+    private actividadesService: ActividadService,
+    private toasService: ToastService
   ) { }
 
   ngOnInit() {
@@ -41,12 +46,14 @@ export class SincronizarPage implements OnInit {
       const unidad = await this.unidadService.obtenerLocal('unidad')
       const categoria = await this.categoriaService.obtenerLocal('actcategoria')
       const subcategoria = await this.subcategoriaService.obtenerLocal('actsubcategoria')
+      const actividad = await this.actividadesService.obtenerLocal('actividad')
       this.users = (user)
       this.fincas = (finca)
       this.sucursales = (sucursal)
       this.unidades = (unidad)
       this.categorias = (categoria)
       this.subcategorias = (subcategoria)
+      this.actividades = (actividad)
     } catch (error) {
       console.error('Error al cargar los datos locales:', error)
     }
@@ -55,16 +62,18 @@ export class SincronizarPage implements OnInit {
   async traerDatos() {
     try {
       // Verificar si el token ya está disponible
-      const token = this.usersService.getCredentials();
+      const token = localStorage.getItem('token')
+
 
       if (!token) {
         console.error('No se encontró un token. Asegúrate de que el usuario haya iniciado sesión.');
+        this.toasService.presentToast('Asegúrate de haber iniciado sesión', 'danger', 'top')
         return;
       }
 
       if (!this.usersService.token) {
         console.log('Generando token')
-        await this.usersService.geneToken(token.identificacion, token.password)
+        const token = localStorage.getItem('token')
         console.log('Token generado')
       }
 
@@ -75,6 +84,7 @@ export class SincronizarPage implements OnInit {
       await this.unidadService.sincronizar('unidad', 'unidad')
       await this.categoriaService.sincronizar('act-categoria', 'actcategoria')
       await this.subcategoriaService.sincronizar('act-subcategoria', 'actsubcategoria' )
+      await this.actividadesService.sincronizar('actividad', 'actividad')
       await this.cargar();
       console.log('Sincronización completada exitosamente.');
     } catch (error) {

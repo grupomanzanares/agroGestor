@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import { SqliteManagerService } from './sqlite-manager.service';
@@ -16,7 +16,11 @@ export class SubcategoriaService {
   constructor(private http: HttpClient, private sqlManagerService: SqliteManagerService) { }
 
   obtenerVps(endPoint: string): Observable<Subcategoria[]> {
-    return this.http.get<Subcategoria[]>(`${this.apiUrl}${endPoint}`)
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    })
+    return this.http.get<Subcategoria[]>(`${this.apiUrl}${endPoint}`, { headers })
   }
 
   async obtenerLocal(tabla: string): Promise<Subcategoria[]> {
@@ -189,7 +193,7 @@ export class SubcategoriaService {
 
       if (create.length > 0) {
         await this.create(create, tabla)
-        console.log('Datos de fincas insertados correctamente')
+        console.log('Datos de subcategorias insertados correctamente')
       }
 
       if (update.length === 0 && create.length === 0) {

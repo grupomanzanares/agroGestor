@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import { SqliteManagerService } from './sqlite-manager.service';
-import { forkJoin, from, map, Observable } from 'rxjs';
+import { forkJoin, from, lastValueFrom, map, Observable } from 'rxjs';
 import { Actividad } from '../models/actividad';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
 
@@ -16,21 +16,28 @@ export class ActividadService {
   constructor(private http: HttpClient, private sqlManagerService: SqliteManagerService) { }
 
   obtenerVps(endPoint: string): Observable<Actividad[]> {
-    return this.http.get<Actividad[]>(`${this.apiUrl}${endPoint}`)
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    })
+    return this.http.get<Actividad[]>(`${this.apiUrl}${endPoint}`, { headers })
   }
 
   async obtenerLocal(tabla: string): Promise<Actividad[]> {
-    const db = await this.sqlManagerService.getDbName()
-    const sql = `SELECT * FROM ${tabla}`
-
+    const db = await this.sqlManagerService.getDbName();
+    const sql = `SELECT * FROM ${tabla}`;
+  
     try {
       const result = await CapacitorSQLite.query({
         database: db,
         statement: sql,
         values: []
-      })
+      });
+  
+      console.log('Resultado de la consulta local:', result);
+  
       if (result.values) {
-        const datos = await result.values.map(row => ({
+        const datos = result.values.map(row => ({
           id: row.id,
           nombre: row.nombre,
           descripcion: row.descripcion,
@@ -42,34 +49,38 @@ export class ActividadService {
           updatedAt: row.updatedAt,
           unidadId: row.unidadId,
           subCategoriaId: row.subCategoriaId
-        }))
+        }));
+        console.log('Datos procesados localmente:', datos);
         return datos;
       } else {
-        throw new Error("No se encontraron datos de las actividades en la base de datos")
+        throw new Error('No se encontraron datos en la base de datos local');
       }
     } catch (error) {
-      console.error('Error al consultar los datos locales', error)
-      throw error
+      console.error('Error al consultar los datos locales:', error);
+      throw error;
     }
-  }
+  }  
 
   comparacion(endPoint: string, tabla: string): Observable<{ update: Actividad[], create: Actividad[] }> {
     return forkJoin({
-      vpsDatos: this.obtenerLocal(endPoint),
+      vpsDatos: this.obtenerVps(endPoint),
       localDatos: from(this.obtenerLocal(tabla))
     }).pipe(
       map(result => {
-        const { vpsDatos, localDatos } = result
-
+        const { vpsDatos, localDatos } = result;
+  
+        console.log('Datos del VPS:', vpsDatos);
+        console.log('Datos locales:', localDatos);
+  
         if (localDatos.length === 0) {
-          console.log('No hay datos locales, todos los datos del VPS seran creados')
-          return { update: [], create: vpsDatos }
+          console.log('No hay datos locales, todos los datos del VPS serán creados');
+          return { update: [], create: vpsDatos };
         }
-
+  
         const update = vpsDatos.filter(vpsDato => {
-          const localDato = localDatos.find(localDato => localDato.id === vpsDato.id)
-          if (!localDato) return false
-
+          const localDato = localDatos.find(localDato => localDato.id === vpsDato.id);
+          if (!localDato) return false;
+  
           return (
             vpsDato.nombre !== localDato.nombre ||
             vpsDato.descripcion !== localDato.descripcion ||
@@ -81,13 +92,16 @@ export class ActividadService {
             vpsDato.updatedAt !== localDato.updatedAt ||
             vpsDato.unidadId !== localDato.unidadId ||
             vpsDato.subCategoriaId !== localDato.subCategoriaId
-          )
+          );
         });
-        const create = vpsDatos.filter(vpsDatos => !localDatos.find(localDato => localDato.id === vpsDatos.id))
-        return { update, create }
+  
+        const create = vpsDatos.filter(vpsDato => !localDatos.some(localDato => localDato.id === vpsDato.id));
+  
+        return { update, create };
       })
-    )
+    );
   }
+  
 
   async update(datosDiferentes: Actividad[], tabla: string) {
     console.log(`Datos diferentes recibidos para actualizar: ${datosDiferentes}`)
@@ -133,9 +147,9 @@ export class ActividadService {
             }
           ]
         })
-        if(cambios.length > 0){
+        if (cambios.length > 0) {
           console.log(`Actividad con id ${datos.id} actializada correctaente`)
-        }else{
+        } else {
           console.log(`Actividad con id ${datos.id} no requiere de actualizacion`)
         }
       }
@@ -143,5 +157,79 @@ export class ActividadService {
       console.error('Error al actualizar las actividades: ', error)
     }
   }
+
+  async create(datosParaCrear: Actividad[], tabla: string) {
+    const db = await this.sqlManagerService.getDbName();
+    const sql = `INSERT INTO ${tabla} (id, nombre, descripcion, controlPorLote, habilitado, usuario, usuarioMod, createdAt, updatedAt, unidadId, subCategoriaId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  
+    try {
+      for (const datos of datosParaCrear) {
+        console.log('Intentando insertar:', datos);
+  
+        const exsDatos = await CapacitorSQLite.query({
+          database: db,
+          statement: `SELECT id FROM ${tabla} WHERE id = ?`,
+          values: [datos.id]
+        });
+  
+        if (exsDatos.values && exsDatos.values.length === 0) {
+          await CapacitorSQLite.executeSet({
+            database: db,
+            set: [{
+              statement: sql,
+              values: [
+                datos.id,
+                datos.nombre,
+                datos.descripcion,
+                datos.controlPorLote,
+                datos.habilitado || 1,
+                datos.usuario,
+                datos.usuarioMod,
+                datos.createdAt,
+                datos.updatedAt,
+                datos.unidadId,
+                datos.subCategoriaId
+              ]
+            }]
+          });
+          console.log(`Actividad con id ${datos.id} creada exitosamente`);
+        } else {
+          console.log(`Actividad con id ${datos.id} ya existe, omitiendo la inserción`);
+        }
+      }
+    } catch (error) {
+      console.error('Error al crear nuevos datos:', error);
+    }
+  }
+  
+
+  async sincronizar(endPoint: string, tabla: string) {
+    try {
+      const { update, create } = await lastValueFrom(this.comparacion(endPoint, tabla));
+  
+      console.log('Datos para actualizar:', update);
+      console.log('Datos para crear:', create);
+  
+      if (update.length > 0) {
+        await this.update(update, tabla);
+        console.log('Datos actualizados con éxito');
+      } else {
+        console.log('No hay datos que actualizar');
+      }
+  
+      if (create.length > 0) {
+        await this.create(create, tabla);
+        console.log('Datos creados con éxito');
+      } else {
+        console.log('No hay datos que crear');
+      }
+  
+      if (update.length === 0 && create.length === 0) { 
+        console.log('No hay cambios para aplicar');
+      }
+    } catch (error) {
+      console.error('Error en la sincronización:', error);
+    }
+  }  
 
 }

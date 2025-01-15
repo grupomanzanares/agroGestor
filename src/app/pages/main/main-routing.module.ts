@@ -7,21 +7,17 @@ const routes: Routes = [
   {
     path: '',
     component: MainPage,
-    children:[
-      {
-        path: 'actividades',
-        loadChildren: ()=> import('./actividades/actividades.module').then(m => m.ActividadesPageModule)
-      },
-      {
-        path: 'sincronizar',
-        loadChildren: () => import('./sincronizar/sincronizar.module').then( m => m.SincronizarPageModule)
-      }
+    children: [
     ]
+  },  {
+    path: 'programacion',
+    loadChildren: () => import('./programacion/programacion.module').then( m => m.ProgramacionPageModule)
   },
+
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class MainPageRoutingModule {}
+export class MainPageRoutingModule { }

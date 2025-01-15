@@ -1,4 +1,4 @@
-<app-header title="Sincronizacion" class="ion-text-center"></app-header>
+<app-header title="Sincronizacion" [showback]="true"></app-header>
 
 <ion-content [fullscreen]="true">
   <div class="ion-text-center ion-padding">
@@ -7,7 +7,8 @@
       Sincronización
     </ion-button>
 
-    <!-- Tabla para las fincas -->
+    <!-- Título y tabla para las fincas -->
+    <h3>Fincas</h3>
     <table class="sync-table">
       <thead>
         <tr>
@@ -23,7 +24,8 @@
       </tbody>
     </table>
 
-    <!-- Tabla para los usuarios -->
+    <!-- Título y tabla para los usuarios -->
+    <h3>Usuarios</h3>
     <table class="sync-table">
       <thead>
         <tr>
@@ -39,7 +41,8 @@
       </tbody>
     </table>
 
-    <!-- Tabla para las sucursales -->
+    <!-- Título y tabla para las sucursales -->
+    <h3>Sucursales</h3>
     <table class="sync-table">
       <thead>
         <tr>
@@ -53,8 +56,10 @@
           <td>{{ datos.nombre }}</td>
         </tr>
       </tbody>
-    </table> 
+    </table>
 
+    <!-- Título y tabla para las unidades -->
+    <h3>Unidades</h3>
     <table class="sync-table">
       <thead>
         <tr>
@@ -68,8 +73,10 @@
           <td>{{ datos.nombre }}</td>
         </tr>
       </tbody>
-    </table> 
+    </table>
 
+    <!-- Título y tabla para las categorías -->
+    <h3>Categorías</h3>
     <table class="sync-table">
       <thead>
         <tr>
@@ -83,8 +90,10 @@
           <td>{{ datos.nombre }}</td>
         </tr>
       </tbody>
-    </table> 
+    </table>
 
+    <!-- Título y tabla para las subcategorías -->
+    <h3>Subcategorías</h3>
     <table class="sync-table">
       <thead>
         <tr>
@@ -98,7 +107,24 @@
           <td>{{ datos.nombre }}</td>
         </tr>
       </tbody>
-    </table> 
+    </table>
+
+    <!-- Título y tabla para las actividades -->
+    <h3>Actividades</h3>
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of actividades">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table>
 
   </div>
 </ion-content>

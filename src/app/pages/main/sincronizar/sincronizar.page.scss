@@ -45,6 +45,13 @@
     color: #05a786; /* Color para resaltar una fila activa */
 }
 
+h3 {
+    font-weight: bold;
+    margin: 40px 0;
+    color: #333;
+  }
+  
+
 /* Media Queries para Pantallas Pequeñas */
 @media screen and (max-width: 768px) {
     .sync-table {

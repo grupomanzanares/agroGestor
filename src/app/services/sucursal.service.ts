@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import { SqliteManagerService } from './sqlite-manager.service';
@@ -16,10 +16,14 @@ export class SucursalService {
   constructor(private http: HttpClient, private sqlManagerService: SqliteManagerService) { }
 
   obtenerVps(endPoint: string): Observable<Sucursal[]> {
-    return this.http.get<Sucursal[]>(`${this.apiUrl}${endPoint}`)
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    })
+    return this.http.get<Sucursal[]>(`${this.apiUrl}${endPoint}`, { headers })
   }
 
-  async obtenerLocal(tabla: string): Promise<Sucursal[]>{
+  async obtenerLocal(tabla: string): Promise<Sucursal[]> {
     const db = await this.sqlManagerService.getDbName()
     const sql = `SELECT * FROM ${tabla}`
 
@@ -50,7 +54,7 @@ export class SucursalService {
     }
   }
 
-  comparacion(endPoint: string, tabla: string): Observable <{ update: Sucursal[], create: Sucursal[] }>{
+  comparacion(endPoint: string, tabla: string): Observable<{ update: Sucursal[], create: Sucursal[] }> {
     return forkJoin({
       vpsDatos: this.obtenerVps(endPoint),
       localDatos: from(this.obtenerLocal(tabla))
@@ -64,26 +68,26 @@ export class SucursalService {
         }
 
         const update = vpsDatos.filter(vpsDato => {
-          const localDato = localDatos.find(localDato => localDato.id === vpsDato.id )
-            if(!localDato) return false
+          const localDato = localDatos.find(localDato => localDato.id === vpsDato.id)
+          if (!localDato) return false
 
-            return(
-              vpsDato.nombre !== localDato.nombre || 
-              vpsDato.descripcion !== localDato.descripcion ||
-              vpsDato.habilitado !== localDato.habilitado ||
-              vpsDato.usuario !== localDato.usuario ||
-              vpsDato.usuarioMod !== localDato.usuarioMod ||
-              vpsDato.createdAt !== localDato.createdAt ||
-              vpsDato.updatedAt !== localDato.updatedAt
-            )
+          return (
+            vpsDato.nombre !== localDato.nombre ||
+            vpsDato.descripcion !== localDato.descripcion ||
+            vpsDato.habilitado !== localDato.habilitado ||
+            vpsDato.usuario !== localDato.usuario ||
+            vpsDato.usuarioMod !== localDato.usuarioMod ||
+            vpsDato.createdAt !== localDato.createdAt ||
+            vpsDato.updatedAt !== localDato.updatedAt
+          )
         });
-        const create = vpsDatos.filter(vpsDatos => !localDatos.find(localDato => localDato.id === vpsDatos.id ))
+        const create = vpsDatos.filter(vpsDatos => !localDatos.find(localDato => localDato.id === vpsDatos.id))
         return { update, create }
       })
     );
   }
 
-  async update(datosDiferentes: Sucursal[], tabla: string){
+  async update(datosDiferentes: Sucursal[], tabla: string) {
     console.log(`Datos diferentes recibidos para actualizar: ${datosDiferentes}`)
     if (datosDiferentes.length === 0) {
       console.log(`No hay datos diferentes para actualizar`)
@@ -97,13 +101,13 @@ export class SucursalService {
       for (const datos of datosDiferentes) {
         let cambios = []
 
-        if(datos.nombre !== undefined) cambios.push('nombre');
-        if(datos.descripcion !== undefined) cambios.push('descripcion');
-        if(datos.habilitado !== undefined) cambios.push('habilitado');
-        if(datos.usuario !== undefined) cambios.push('usuario');
-        if(datos.usuarioMod !== undefined) cambios.push('usuarioMod');
-        if(datos.createdAt !== undefined) cambios.push('createdAt');
-        if(datos.updatedAt !== undefined) cambios.push('updatedAt');
+        if (datos.nombre !== undefined) cambios.push('nombre');
+        if (datos.descripcion !== undefined) cambios.push('descripcion');
+        if (datos.habilitado !== undefined) cambios.push('habilitado');
+        if (datos.usuario !== undefined) cambios.push('usuario');
+        if (datos.usuarioMod !== undefined) cambios.push('usuarioMod');
+        if (datos.createdAt !== undefined) cambios.push('createdAt');
+        if (datos.updatedAt !== undefined) cambios.push('updatedAt');
 
         await CapacitorSQLite.executeSet({
           database: db,
@@ -125,7 +129,7 @@ export class SucursalService {
         if (cambios.length > 0) {
           console.log(`Sucursal con id ${datos.id} actualizado con exito, ${cambios.join(', ')}`)
         } else {
-          console.log(`Sucursal con id ${datos.id} no requiere de actualizacion`)          
+          console.log(`Sucursal con id ${datos.id} no requiere de actualizacion`)
         }
       }
     } catch (error) {
@@ -133,9 +137,9 @@ export class SucursalService {
     }
   }
 
-  async create(datosParaCrear: Sucursal[], tabla: string){
+  async create(datosParaCrear: Sucursal[], tabla: string) {
     const db = await this.sqlManagerService.getDbName();
-    const sql =  `INSERT INTO ${tabla} (id, nombre, descripcion, habilitado, usuario, usuarioMod, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    const sql = `INSERT INTO ${tabla} (id, nombre, descripcion, habilitado, usuario, usuarioMod, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
     try {
       for (const datos of datosParaCrear) {
@@ -171,7 +175,7 @@ export class SucursalService {
     }
   }
 
-  async sincronizar(endPoint: string, tabla: string){
+  async sincronizar(endPoint: string, tabla: string) {
     try {
       const { update, create } = await lastValueFrom(this.comparacion(endPoint, tabla))
 
@@ -179,19 +183,19 @@ export class SucursalService {
         await this.update(update, tabla)
         console.log(`Sucursal actualizada con exito`)
       } else {
-        console.log(`No hay datos que actualizar`)        
+        console.log(`No hay datos que actualizar`)
       }
 
       if (create.length > 0) {
         await this.create(create, tabla)
-        console.log('Datos de fincas insertados correctamente')
+        console.log('Datos de sucursal insertados correctamente')
       }
 
-      if(update.length === 0 && create.length === 0){
+      if (update.length === 0 && create.length === 0) {
         console.log(`No hay cambios para aplicar`)
       }
     } catch (error) {
-      console.error(`Error en la sincronizacion: ${error}`)      
+      console.error(`Error en la sincronizacion: ${error}`)
     }
   }
 

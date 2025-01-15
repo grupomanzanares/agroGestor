@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-main',
@@ -9,9 +10,8 @@ import { Router } from '@angular/router';
 export class MainPage implements OnInit {
 
   currentPath: string = '';
-  selectedButton: string = '';
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private auth: AuthService) { }
 
   ngOnInit() {
     this.router.events.subscribe((event: any) => {
@@ -21,17 +21,17 @@ export class MainPage implements OnInit {
 
   navigateTo(event: Event): void {
     // Obtén el ID del botón presionado
-    const targetId = (event.target as HTMLElement).id;
+    const targetId = (event.currentTarget as HTMLElement).id;
 
     try {
       switch (targetId) {
         case 'actividades':
-          this.router.navigateByUrl('main/actividades');
+          this.router.navigateByUrl('programacion');
           console.log('Navegando a: main/actividades');
           break;
 
         case 'sincronizar':
-          this.router.navigateByUrl('main/sincronizar');
+          this.router.navigateByUrl('sincronizar');
           console.log('Navegando a: main/sincronizar');
           break;
 
@@ -49,4 +49,7 @@ export class MainPage implements OnInit {
     }
   }
 
+  logout(){
+    this.auth.logout()
+  }
 }

@@ -1,6 +1,9 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>
+    <ion-buttons slot="start" *ngIf="showback">
+      <ion-icon size="large" name="arrow-back-outline" (click)="menu()"></ion-icon>
+    </ion-buttons>
+    <ion-title class="ion-text-center">
       <strong>{{ title }}</strong>
     </ion-title>
   </ion-toolbar>

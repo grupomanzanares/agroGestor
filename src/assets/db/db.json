@@ -111,6 +111,22 @@
                 { "column": "updatedAt", "value":"TEXT NULL"},
                 { "column": "sucursalId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(sucursalId) REFERENCES sucursal(id)" }
             ]
+        },
+        {
+            "name": "actividad",
+            "schema":[
+                { "column": "id", "value":"INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "nombre", "value":"TEXT NOT NULL" },
+                { "column": "descripcion", "value": "TEXT NULL" },
+                { "column": "controlPorLote", "value":"TEXT NOT NULL" },
+                { "column": "habilitado", "value":"INTEGER"},
+                { "column": "usuario", "value":"TEXT NULL"},
+                { "column": "usuarioMod", "value":"TEXT NULL"},
+                { "column": "createdAt", "value":"TEXT NULL"},
+                { "column": "updatedAt", "value":"TEXT NULL"},
+                { "column": "unidadId", "value":"INTEGER NULL", "foreignkey": "FOREIGN KEY(unidadId) REFERENCES unidad(id)"},
+                { "column": "subCategoriaId", "value": "INTEGER NULL", "foreignkey":"FOREIGN KEY(subCategoriaId) REFERENCES actsubcategoria(id)" }
+            ]
         }
     ]
 }

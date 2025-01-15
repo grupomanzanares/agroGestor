@@ -1,10 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import { SqliteManagerService } from './sqlite-manager.service';
-import { forkJoin, from, lastValueFrom, map, Observable } from 'rxjs';
+import { catchError, forkJoin, from, lastValueFrom, map, Observable, throwError } from 'rxjs';
 import { Users } from '../models/users';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
+import { Router } from '@angular/router';
+import * as CryptoJS from 'crypto-js';
 
 @Injectable({
   providedIn: 'root'
@@ -15,11 +17,71 @@ export class UsersService {
   public token: string | null = null;
   private credentials: { identificacion: number; password: string } | null = null;
 
-  constructor(private http: HttpClient, private sqlManagerService: SqliteManagerService) { }
+  constructor(private http: HttpClient, private sqlManagerService: SqliteManagerService, private router: Router) { }
 
   obtenerVps(endPoint: string): Observable<Users[]> {
-    return this.http.get<Users[]>(`${this.apiUrl}${endPoint}`)
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    })
+    return this.http.get<Users[]>(`${this.apiUrl}${endPoint}`, { headers }).pipe(
+      map((users) => {
+        return users.map((user) => {
+          if (!user.password) {
+            console.warn(`El usuario ${user.identificacion} no tiene un password válido.`);
+            return user;
+          }
+          const decrypted = this.desencriptar(user.password)
+          return { ...user, password: decrypted }
+        })
+      }),
+      catchError((error) => {
+        console.error('Error al obtener datos del VPS:', error);
+        return throwError(() => new Error('Error al obtener datos del VPS.'));
+      })
+    )
   }
+
+  // desencriptar(encryptedText: string): string {
+  //   try {
+  //     const secretKey = environment.secretKey; // Clave compartida con la API
+  //     const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+  //     const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+
+  //     if (!decryptedText) {
+  //       console.warn('No se pudo desencriptar el texto.');
+  //       return encryptedText; // Retorna el texto original si no se puede desencriptar
+  //     }
+
+  //     return decryptedText;
+  //   } catch (error) {
+  //     console.error('Error al desencriptar:', error);
+  //     return encryptedText; // Retorna el texto original en caso de error
+  //   }
+  // }
+  desencriptar(encryptedText: string): string {
+    try {
+      if (!encryptedText) {
+        console.warn('El texto encriptado está vacío o es inválido.');
+        return encryptedText; // Retorna el texto original si está vacío
+      }
+
+      const secretKey = environment.secretKey; // Clave compartida con la API
+      const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+
+      // Verifica que los datos desencriptados sean válidos
+      const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+      if (!decryptedText) {
+        console.warn('No se pudo desencriptar el texto. Retornando el dato original.');
+        return encryptedText;
+      }
+
+      return decryptedText;
+    } catch (error) {
+      console.error('Error al desencriptar:', error.message);
+      return encryptedText; // Retorna el texto original en caso de error
+    }
+  } 
 
   async obtenerDtLocal(tabla: string): Promise<Users[]> {
     const db = await this.sqlManagerService.getDbName()
@@ -187,35 +249,6 @@ export class UsersService {
     }
   }
 
-  async geneToken(identificacion: number, password: string): Promise<string> {
-    const url = `${this.apiUrl}auth/generate-token`; // Cambia '/auth/token' por el endpoint real de tu API
-    const body = { identificacion, password };
-
-    try {
-      const response = await lastValueFrom(
-        this.http.post<{ token: string }>(url, body)
-      );
-      if (response && response.token) {
-        this.token = response.token; // Almacena el token en la variable privada
-        console.log('Token generado y almacenado exitosamente:');
-        return this.token;
-      } else {
-        throw new Error('No se recibió un token en la respuesta.');
-      }
-    } catch (error) {
-      console.error('Error al generar el token:', error);
-      throw new Error('Error al generar el token. Verifica las credenciales.');
-    }
-  }
-
-  getToken(): string | null {
-    return this.token; // Método para acceder al token
-  }
-
-  clearToken(): void {
-    this.token = null; // Método para limpiar el token
-  }
-
   setCredentials(credentials: { identificacion: number; password: string }): void {
     this.credentials = credentials;
   }
@@ -246,4 +279,5 @@ export class UsersService {
       console.error('Error en la sincronización:', error);
     }
   }
+
 }
