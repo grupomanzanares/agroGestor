@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActividadService } from 'src/app/services/actividad.service';
 import { CategoriaService } from 'src/app/services/categoria.service';
 import { FincaService } from 'src/app/services/finca.service';
+import { ProgramacionService } from 'src/app/services/programacion.service';
 import { SubcategoriaService } from 'src/app/services/subcategoria.service';
 import { SucursalService } from 'src/app/services/sucursal.service';
 import { ToastService } from 'src/app/services/toast.service';
@@ -22,6 +23,7 @@ export class SincronizarPage implements OnInit {
   categorias: { id: number, nombre: string }[] = [];
   subcategorias: { id: number, nombre: string }[] = [];
   actividades: {id: number, nombre: string} [] = []
+  programaciones: {id: number, fecha: string} [] = []
 
 
   constructor(
@@ -32,10 +34,12 @@ export class SincronizarPage implements OnInit {
     private categoriaService: CategoriaService,
     private subcategoriaService: SubcategoriaService,
     private actividadesService: ActividadService,
-    private toasService: ToastService
+    private toasService: ToastService,
+    private programacionService: ProgramacionService
   ) { }
 
   ngOnInit() {
+    console.log(this.programaciones)
   }
 
   async cargar() {
@@ -47,6 +51,7 @@ export class SincronizarPage implements OnInit {
       const categoria = await this.categoriaService.obtenerLocal('actcategoria')
       const subcategoria = await this.subcategoriaService.obtenerLocal('actsubcategoria')
       const actividad = await this.actividadesService.obtenerLocal('actividad')
+      const programacion = await this.programacionService.obtenerLocal('programacion')
       this.users = (user)
       this.fincas = (finca)
       this.sucursales = (sucursal)
@@ -54,6 +59,7 @@ export class SincronizarPage implements OnInit {
       this.categorias = (categoria)
       this.subcategorias = (subcategoria)
       this.actividades = (actividad)
+      this.programaciones = (programacion)
     } catch (error) {
       console.error('Error al cargar los datos locales:', error)
     }
@@ -85,6 +91,7 @@ export class SincronizarPage implements OnInit {
       await this.categoriaService.sincronizar('act-categoria', 'actcategoria')
       await this.subcategoriaService.sincronizar('act-subcategoria', 'actsubcategoria' )
       await this.actividadesService.sincronizar('actividad', 'actividad')
+      await this.programacionService.sincronizar('programacion', 'programacion')
       await this.cargar();
       console.log('Sincronización completada exitosamente.');
     } catch (error) {

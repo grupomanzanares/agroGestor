@@ -127,6 +127,57 @@
                 { "column": "unidadId", "value":"INTEGER NULL", "foreignkey": "FOREIGN KEY(unidadId) REFERENCES unidad(id)"},
                 { "column": "subCategoriaId", "value": "INTEGER NULL", "foreignkey":"FOREIGN KEY(subCategoriaId) REFERENCES actsubcategoria(id)" }
             ]
-        }
+        },
+        {
+            "name": "estado",
+            "schema":[
+                { "column": "id", "value":"INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "nombre", "value":"TEXT NOT NULL" },
+                { "column": "descripcion", "value": "TEXT NULL" },
+                { "column": "habilitado", "value":"INTEGER"},
+                { "column": "usuario", "value":"TEXT NULL"},
+                { "column": "usuarioMod", "value":"TEXT NULL"},
+                { "column": "createdAt", "value":"TEXT NULL"},
+                { "column": "updatedAt", "value":"TEXT NULL"}
+            ]
+        },
+        {
+            "name": "prioridad",
+            "schema":[
+                { "column": "id", "value":"INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "nombre", "value":"TEXT NOT NULL" },
+                { "column": "descripcion", "value": "TEXT NULL" },
+                { "column": "habilitado", "value":"INTEGER"},
+                { "column": "usuario", "value":"TEXT NULL"},
+                { "column": "usuarioMod", "value":"TEXT NULL"},
+                { "column": "createdAt", "value":"TEXT NULL"},
+                { "column": "updatedAt", "value":"TEXT NULL"}
+            ]
+        },
+        {
+            "name": "programacion",
+            "schema": [
+                { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "fecha", "value": "TEXT NULL" },
+                { "column": "lote", "value": "INTEGER NULL" },
+                { "column": "jornal", "value": "INTEGER NULL" },
+                { "column": "cantidad", "value": "INTEGER NULL" },
+                { "column": "habilitado", "value": "INTEGER" },
+                { "column": "sincronizado", "value": "INTEGER" },
+                { "column": "fecSincronizacion", "value": "TEXT NULL" },
+                { "column": "observacion", "value": "TEXT NULL" },
+                { "column": "signo", "value": "INTEGER NULL" },
+                { "column": "maquina", "value": "TEXT NULL" },
+                { "column": "usuario", "value": "TEXT NULL" },
+                { "column": "usuarioMod", "value": "TEXT NULL" },
+                { "column": "createdAt", "value": "TEXT NULL" },
+                { "column": "updatedAt", "value": "TEXT NULL" },
+                { "column": "sucursalId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(sucursalId) REFERENCES sucursal(id)" },
+                { "column": "fincaId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(fincaId) REFERENCES finca(id)" },
+                { "column": "actividadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(actividadId) REFERENCES actividad(id)" },
+                { "column": "estadoId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(estadoId) REFERENCES estado(id)" },
+                { "column": "prioridadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(prioridadId) REFERENCES prioridad(id)" }
+            ]
+        }        
     ]
 }

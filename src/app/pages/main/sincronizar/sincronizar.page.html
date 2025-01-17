@@ -126,5 +126,21 @@
       </tbody>
     </table>
 
+    <h3>Programación</h3>
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of programaciones">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.fecha }}</td>
+        </tr>
+      </tbody>
+    </table>   
+
   </div>
 </ion-content>
