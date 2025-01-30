@@ -53,21 +53,16 @@ export class ProgramacionPage implements OnInit {
   }
 
   async onShowForm(programacion: Programacion) {
-    console.log('Programación seleccionada:', programacion);
-
-    // Encuentra el ID del estado basado en el nombre
     const estado = this.estados.find(e => e.nombre === programacion.estadoNombre);
     const estadoId = estado ? estado.id : null;
-
-    console.log('Estado ID encontrado:', estadoId);
-
+  
     this.selectedProgramacion = {
       ...programacion,
       estadoId
     };
-
+  
     this.seguimiento = true; // Mostrar el formulario
-
+  
     // Inicializar los valores del formulario
     this.inputs.patchValue({
       actividad: programacion.actividadNombre,
@@ -75,8 +70,7 @@ export class ProgramacionPage implements OnInit {
       finca: programacion.fincaNombre,
       observaciones: programacion.observacion,
     });
-  }
-
+  }  
 
   onCloseForm() {
     this.seguimiento = false; // Ocultar el formulario
@@ -138,6 +132,15 @@ export class ProgramacionPage implements OnInit {
     return this.programaciones.filter(p => p.estadoNombre === 'Realizado');
   }
 
+  nullestados(programacion: Programacion): Estado[] {
+    if (!programacion || !programacion.estadoId) {
+      return []; // Retorna un arreglo vacío si no hay programación seleccionada
+    }
+  
+    // Filtra los estados que tienen un ID mayor o igual al estado actual
+    return this.estados.filter(e => e.id >= programacion.estadoId);
+  }  
+
   //Funciion para guardar el proceso y los comentarios  en que va la programacion
   saveChange(programacion: any) {
     if (this.inputs.invalid) {
@@ -145,26 +148,34 @@ export class ProgramacionPage implements OnInit {
       this.toastService.presentToast('Por favor completa los campos obligatorios', 'danger', 'top');
       return;
     }
+  
+    const nuevoEstadoId = this.inputs.get('estado')?.value;
+    if (nuevoEstadoId < programacion.estadoId) {
+      this.toastService.presentToast('No puedes seleccionar un estado anterior', 'danger', 'top');
+      return;
+    }
+  
     const data = {
       ...programacion,
-      estadoId: this.inputs.get('estado')?.value,
+      estadoId: nuevoEstadoId,
       observacion: this.inputs.get('observaciones')?.value,
       updatedAt: new Date().toISOString()
-    }
-
+    };
+  
     this.programacionService.updateEst([data], 'programacion')
       .then(() => {
-        this.toastService.presentToast('Cambios guardados correctamente', 'success', 'top')
+        this.toastService.presentToast('Cambios guardados correctamente', 'success', 'top');
         this.selectedProgramacion.estadoId = data.estadoId;
         this.selectedProgramacion.observacion = data.observacion;
-        this.onCloseForm()
+        this.onCloseForm();
       })
       .then(() => {
-        return this.getprogramacion()
+        return this.getprogramacion();
       })
       .catch((error) => {
-        console.error('Error al guardar los datos', error)
-        this.toastService.presentToast('Error al guardar los cambios', 'danger', 'top')
-      })
+        console.error('Error al guardar los datos', error);
+        this.toastService.presentToast('Error al guardar los cambios', 'danger', 'top');
+      });
   }
+  
 }

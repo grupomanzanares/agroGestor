@@ -38,89 +38,8 @@
     </ion-grid>
   </div>
 
-  <!-- Programaciones -->
-  <ion-grid fixed *ngIf="!seguimiento">
-    <ion-row>
-      <ion-col size="6" *ngFor="let item of filteredProgramaciones">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title><strong>ID:</strong> {{ item.id }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <strong>Fecha: </strong>{{ item.fecha }}<br>
-            <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
-            <strong>Finca:</strong> {{ item.fincaNombre }}<br>
-            <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
-            <strong>Estado:</strong> {{ item.estadoNombre }}
-          </ion-card-content>
-          <ion-row>
-            <ion-col size="auto">
-              <ion-button class="ion-margin" (click)="onShowForm(item)" size="small" color="success">
-                <ion-icon name="create-outline" slot="start"></ion-icon> Seguimiento
-              </ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-
-  <!-- Formulario de Seguimiento -->
-  <div *ngIf="seguimiento">
-    <form action="">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Formulario de Seguimiento</ion-card-title>
-        </ion-card-header>
-        <ion-card-content [formGroup]="inputs">
-
-          <!-- Input de Actividad -->
-          <ion-item>
-            <ion-label position="stacked">Actividad</ion-label>
-            <ion-input formControlName="actividad" placeholder="Nombre de la actividad"></ion-input>
-          </ion-item>
-
-          <!-- Input de Finca -->
-          <ion-item>
-            <ion-label position="stacked">Finca</ion-label>
-            <ion-input formControlName="finca" placeholder="Nombre de la finca"></ion-input>
-          </ion-item>
-
-          <!-- Input de Estado -->
-          <ion-item>
-            <ion-label position="stacked">Estado</ion-label>
-            <ion-select interface="popover" placeholder="Estado" formControlName="estado">
-              <ion-select-option *ngFor="let item of estados" [value]="item.id">
-                {{ item.nombre }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item>
-
-          <!-- Input de Observaciones -->
-          <ion-item>
-            <ion-label position="stacked">Observaciones</ion-label>
-            <ion-textarea formControlName="observaciones" placeholder="Escribe aquí" require></ion-textarea>
-            <div class="error" *ngIf="inputs.controls.observaciones.errors && inputs.controls.observaciones.touched">
-              <samp *ngIf="inputs.controls.observaciones.errors?.['required']">Este campo es obligatorio</samp>
-            </div>
-          </ion-item>
-
-          <!-- Botones -->
-          <ion-row>
-            <ion-col size="6">
-              <ion-button expand="block" color="primary" (click)="saveChange(selectedProgramacion)">Guardar</ion-button>
-            </ion-col>
-            <ion-col size="6">
-              <ion-button expand="block" color="danger" (click)="onCloseForm()">Cancelar</ion-button>
-            </ion-col>
-          </ion-row>
-        </ion-card-content>
-      </ion-card>
-    </form>
-  </div>
-
-  <!-- Estado -->
-  <ion-grid fixed *ngIf="!seguimiento">
+   <!-- Estado -->
+   <ion-grid fixed *ngIf="!seguimiento">
     <ion-row>
       <ion-col size="12">
         <ion-accordion-group>
@@ -218,6 +137,7 @@
                       </ion-row>
                     </ion-card>
                   </ion-col>
+                  
                 </ion-row>
               </ion-grid>
             </div>
@@ -226,4 +146,86 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+
+  <!-- Programaciones -->
+  <ion-grid fixed *ngIf="!seguimiento">
+    <ion-row>
+      <ion-col size="6" *ngFor="let item of filteredProgramaciones">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title><strong>ID:</strong> {{ item.id }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <strong>Fecha: </strong>{{ item.fecha }}<br>
+            <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
+            <strong>Finca:</strong> {{ item.fincaNombre }}<br>
+            <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+            <strong>Estado:</strong> {{ item.estadoNombre }}
+          </ion-card-content>
+          <ion-row>
+            <ion-col size="auto">
+              <ion-button class="ion-margin" (click)="onShowForm(item)" size="small" color="success">
+                <ion-icon name="create-outline" slot="start"></ion-icon> Seguimiento
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Formulario de Seguimiento -->
+  <div *ngIf="seguimiento">
+    <form action="">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Formulario de Seguimiento</ion-card-title>
+        </ion-card-header>
+        <ion-card-content [formGroup]="inputs">
+
+          <!-- Input de Actividad -->
+          <ion-item>
+            <ion-label position="stacked">Actividad</ion-label>
+            <ion-input formControlName="actividad" placeholder="Nombre de la actividad"></ion-input>
+          </ion-item>
+
+          <!-- Input de Finca -->
+          <ion-item>
+            <ion-label position="stacked">Finca</ion-label>
+            <ion-input formControlName="finca" placeholder="Nombre de la finca"></ion-input>
+          </ion-item>
+
+          <!-- Input de Estado -->
+          <ion-item>
+            <ion-label position="stacked">Estado</ion-label>
+            <ion-select interface="popover" placeholder="Estado" formControlName="estado">
+              <ion-select-option *ngFor="let item of nullestados(selectedProgramacion)" [value]="item.id">
+                {{ item.nombre }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>          
+
+          <!-- Input de Observaciones -->
+          <ion-item>
+            <ion-label position="stacked">Observaciones</ion-label>
+            <ion-textarea formControlName="observaciones" placeholder="Escribe aquí" require></ion-textarea>
+            <div class="error" *ngIf="inputs.controls.observaciones.errors && inputs.controls.observaciones.touched">
+              <samp *ngIf="inputs.controls.observaciones.errors?.['required']">Este campo es obligatorio</samp>
+            </div>
+          </ion-item>
+
+          <!-- Botones -->
+          <ion-row>
+            <ion-col size="6">
+              <ion-button expand="block" color="primary" (click)="saveChange(selectedProgramacion)">Guardar</ion-button>
+            </ion-col>
+            <ion-col size="6">
+              <ion-button expand="block" color="danger" (click)="onCloseForm()">Cancelar</ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-card-content>
+      </ion-card>
+    </form>
+  </div>
+
 </ion-content>

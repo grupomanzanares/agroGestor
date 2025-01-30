@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Network } from '@capacitor/network';
 import { ActividadService } from 'src/app/services/actividad.service';
 import { CategoriaService } from 'src/app/services/categoria.service';
 import { EstadoService } from 'src/app/services/estado.service';
@@ -76,36 +77,42 @@ export class SincronizarPage implements OnInit {
   }
 
   async traerDatos() {
+    const conexion = Network.getStatus()
     try {
-      // Verificar si el token ya está disponible
-      const token = localStorage.getItem('token')
 
-
-      if (!token) {
-        console.error('No se encontró un token. Asegúrate de que el usuario haya iniciado sesión.');
-        this.toasService.presentToast('Asegúrate de haber iniciado sesión', 'danger', 'top')
-        return;
-      }
-
-      if (!this.usersService.token) {
-        console.log('Generando token')
+      if ((await conexion).connected) {
         const token = localStorage.getItem('token')
-        console.log('Token generado')
+  
+        if (!token) {
+          console.error('No se encontró un token. Asegúrate de que el usuario haya iniciado sesión.');
+          this.toasService.presentToast('Asegúrate de haber iniciado sesión', 'danger', 'top')
+          return;
+        }
+  
+        if (!this.usersService.token) {
+          console.log('Generando token')
+          const token = localStorage.getItem('token')
+          console.log('Token generado')
+        }
+  
+        // Sincronizar datos usando el token ya existente
+        await this.fincaService.sicronizarFinca('finca', 'finca');
+        await this.usersService.sincronizarUsers('users', 'users');
+        await this.sucursalService.sincronizar('sucursal', 'sucursal');
+        await this.unidadService.sincronizar('unidad', 'unidad')
+        await this.categoriaService.sincronizar('act-categoria', 'actcategoria')
+        await this.subcategoriaService.sincronizar('act-subcategoria', 'actsubcategoria' )
+        await this.actividadesService.sincronizar('actividad', 'actividad')
+        await this.programacionService.sincronizar('programacion', 'programacion')
+        await this.prioridadService.sincronizar('prioridad', 'prioridad')
+        await this.estadoService.sincronizar('estado', 'estado')
+        await this.cargar();
+        console.log('Sincronización completada exitosamente.');
+      } else {
+        this.toasService.presentToast('Debes tener conexión a internet para hacer esto', 'danger', 'top')
       }
 
-      // Sincronizar datos usando el token ya existente
-      await this.fincaService.sicronizarFinca('finca', 'finca');
-      await this.usersService.sincronizarUsers('users', 'users');
-      await this.sucursalService.sincronizar('sucursal', 'sucursal');
-      await this.unidadService.sincronizar('unidad', 'unidad')
-      await this.categoriaService.sincronizar('act-categoria', 'actcategoria')
-      await this.subcategoriaService.sincronizar('act-subcategoria', 'actsubcategoria' )
-      await this.actividadesService.sincronizar('actividad', 'actividad')
-      await this.programacionService.sincronizar('programacion', 'programacion')
-      await this.prioridadService.sincronizar('prioridad', 'prioridad')
-      await this.estadoService.sincronizar('estado', 'estado')
-      await this.cargar();
-      console.log('Sincronización completada exitosamente.');
+      // Verificar si el token ya está disponible
     } catch (error) {
       console.error('Error en la sincronización:', error);
     }
