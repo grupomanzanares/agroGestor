@@ -1,26 +1,36 @@
 .title-with-color {
-    display: flex; /* Para alinear elementos en una fila */
-    align-items: center; /* Alinear verticalmente */
-    gap: 10px; /* Espacio entre el texto y el cuadro de color */
-  }
-  
-  .color-box {
-    display: inline-block;
-    width: 20px; /* Ancho del cuadro */
-    height: 20px; /* Altura del cuadro */
-    border-radius: 10px; /* Esquinas redondeadas (opcional) */
-  }
-  
-  /* Colores específicos */
-  .pendiente {
-    background-color: #FF2511;
-  }
-  
-  .en-proceso {
-    background-color: orange;
-  }
-  
-  .realizado {
-    background-color: #18A558;
-  }
-  
+  display: flex;
+  /* Para alinear elementos en una fila */
+  align-items: center;
+  /* Alinear verticalmente */
+  gap: 10px;
+  /* Espacio entre el texto y el cuadro de color */
+}
+
+.color-box {
+  display: inline-block;
+  width: 15px;
+  /* Ancho del cuadro */
+  height: 15px;
+  /* Altura del cuadro */
+  border-radius: 10px;
+  /* Esquinas redondeadas (opcional) */
+}
+
+/* Colores específicos */
+.pendiente {
+  background-color: #FF2511;
+}
+
+.en-proceso {
+  background-color: orange;
+}
+
+.realizado {
+  background-color: #18A558;
+}
+
+ion-button {
+  --background: #047066; /* Cambia el color de fondo */
+  --color: #ffffff; /* Cambia el color del texto */
+}

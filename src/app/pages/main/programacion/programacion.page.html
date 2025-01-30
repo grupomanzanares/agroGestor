@@ -1,46 +1,229 @@
 <app-header title="Programacion" [showback]="true"></app-header>
 
-<ion-grid fixed>
+<ion-content [fullscreen]="true">
+  <!-- Botón de Buscar -->
+  <div class="ion-margin-top" *ngIf="!seguimiento">
+    <ion-button expand="block" (click)="toggleFilters()">
+      {{ showFilters ? 'Ocultar Filtros' : 'Buscar' }}
+    </ion-button>
+  </div>
+
+  <!-- Filtros -->
+  <div *ngIf="showFilters && !seguimiento">
+    <ion-grid fixed>
+      <ion-row>
+        <ion-col size="12">
+          <ion-item>
+            <ion-label position="stacked">Filtrar por Prioridad</ion-label>
+            <ion-select interface="popover" [(ngModel)]="filterPriori" placeholder="Selecciona la prioridad">
+              <ion-select-option *ngFor="let prioridad of prioridades" [value]="prioridad.nombre">
+                {{ prioridad.nombre }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col size="12">
+          <ion-grid fixed>
+            <ion-row>
+              <ion-col size="12">
+                <ion-button expand="block" (click)="filter()">Aplicar Filtro</ion-button>
+              </ion-col>
+              <ion-col size="12">
+                <ion-button expand="block" color="light" (click)="resetFilters()">Limpiar Filtro</ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- Programaciones -->
+  <ion-grid fixed *ngIf="!seguimiento">
     <ion-row>
-      <ion-col size="3">
+      <ion-col size="6" *ngFor="let item of filteredProgramaciones">
         <ion-card>
           <ion-card-header>
-            <ion-card-title>
-              <div class="title-with-color">
-                Pendiente <span class="color-box pendiente"></span>
-              </div>
-            </ion-card-title>
+            <ion-card-title><strong>ID:</strong> {{ item.id }}</ion-card-title>
           </ion-card-header>
           <ion-card-content>
+            <strong>Fecha: </strong>{{ item.fecha }}<br>
+            <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
+            <strong>Finca:</strong> {{ item.fincaNombre }}<br>
+            <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+            <strong>Estado:</strong> {{ item.estadoNombre }}
           </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="3">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              <div class="title-with-color">
-                En Proceso <span class="color-box en-proceso"></span>
-              </div>
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size="3">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              <div class="title-with-color">
-                Realizado <span class="color-box realizado"></span>
-              </div>
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-          </ion-card-content>
+          <ion-row>
+            <ion-col size="auto">
+              <ion-button class="ion-margin" (click)="onShowForm(item)" size="small" color="success">
+                <ion-icon name="create-outline" slot="start"></ion-icon> Seguimiento
+              </ion-button>
+            </ion-col>
+          </ion-row>
         </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>
-  
+
+  <!-- Formulario de Seguimiento -->
+  <div *ngIf="seguimiento">
+    <form action="">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Formulario de Seguimiento</ion-card-title>
+        </ion-card-header>
+        <ion-card-content [formGroup]="inputs">
+
+          <!-- Input de Actividad -->
+          <ion-item>
+            <ion-label position="stacked">Actividad</ion-label>
+            <ion-input formControlName="actividad" placeholder="Nombre de la actividad"></ion-input>
+          </ion-item>
+
+          <!-- Input de Finca -->
+          <ion-item>
+            <ion-label position="stacked">Finca</ion-label>
+            <ion-input formControlName="finca" placeholder="Nombre de la finca"></ion-input>
+          </ion-item>
+
+          <!-- Input de Estado -->
+          <ion-item>
+            <ion-label position="stacked">Estado</ion-label>
+            <ion-select interface="popover" placeholder="Estado" formControlName="estado">
+              <ion-select-option *ngFor="let item of estados" [value]="item.id">
+                {{ item.nombre }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Input de Observaciones -->
+          <ion-item>
+            <ion-label position="stacked">Observaciones</ion-label>
+            <ion-textarea formControlName="observaciones" placeholder="Escribe aquí" require></ion-textarea>
+            <div class="error" *ngIf="inputs.controls.observaciones.errors && inputs.controls.observaciones.touched">
+              <samp *ngIf="inputs.controls.observaciones.errors?.['required']">Este campo es obligatorio</samp>
+            </div>
+          </ion-item>
+
+          <!-- Botones -->
+          <ion-row>
+            <ion-col size="6">
+              <ion-button expand="block" color="primary" (click)="saveChange(selectedProgramacion)">Guardar</ion-button>
+            </ion-col>
+            <ion-col size="6">
+              <ion-button expand="block" color="danger" (click)="onCloseForm()">Cancelar</ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-card-content>
+      </ion-card>
+    </form>
+  </div>
+
+  <!-- Estado -->
+  <ion-grid fixed *ngIf="!seguimiento">
+    <ion-row>
+      <ion-col size="12">
+        <ion-accordion-group>
+          <!-- Pendiente -->
+          <ion-accordion value="pendiente">
+            <ion-item slot="header" color="light">
+              <ion-label>Pendiente ({{ getPendientes().length }})</ion-label>
+            </ion-item>
+            <div slot="content">
+              <ion-grid fixed>
+                <ion-row>
+                  <ion-col size="6" *ngFor="let item of getPendientes()">
+                    <ion-card>
+                      <ion-card-header>
+                        <ion-card-title><strong>ID:</strong> {{ item.id }}</ion-card-title>
+                      </ion-card-header>
+                      <ion-card-content>
+                        <strong>Fecha: </strong>{{ item.fecha }}<br>
+                        <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
+                        <strong>Finca:</strong> {{ item.fincaNombre }}<br>
+                        <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+                      </ion-card-content>
+                      <ion-row>
+                        <ion-col size="auto">
+                          <ion-button class="ion-margin" (click)="onShowForm(item)" size="small" color="success">
+                            <ion-icon name="create-outline" slot="start"></ion-icon> Seguimiento
+                          </ion-button>
+                        </ion-col>
+                      </ion-row>
+                    </ion-card>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </div>
+          </ion-accordion>
+
+          <!-- Proceso -->
+          <ion-accordion value="proceso">
+            <ion-item slot="header" color="light">
+              <ion-label>Proceso ({{ getEnProceso().length }})</ion-label>
+            </ion-item>
+            <div slot="content">
+              <ion-grid fixed>
+                <ion-row>
+                  <ion-col size="6" *ngFor="let item of getEnProceso()">
+                    <ion-card>
+                      <ion-card-header>
+                        <ion-card-title><strong>ID:</strong> {{ item.id }}</ion-card-title>
+                      </ion-card-header>
+                      <ion-card-content>
+                        <strong>Fecha: </strong>{{ item.fecha }}<br>
+                        <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
+                        <strong>Finca:</strong> {{ item.fincaNombre }}<br>
+                        <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+                      </ion-card-content>
+                      <ion-row>
+                        <ion-col size="auto">
+                          <ion-button class="ion-margin" (click)="onShowForm(item)" size="small" color="success">
+                            <ion-icon name="create-outline" slot="start"></ion-icon> Seguimiento
+                          </ion-button>
+                        </ion-col>
+                      </ion-row>
+                    </ion-card>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </div>
+          </ion-accordion>
+
+          <!-- Realizado -->
+          <ion-accordion value="realizado">
+            <ion-item slot="header" color="light">
+              <ion-label>Realizado ({{ getRealizados().length }})</ion-label>
+            </ion-item>
+            <div slot="content">
+              <ion-grid fixed>
+                <ion-row>
+                  <ion-col size="6" *ngFor="let item of getRealizados()">
+                    <ion-card>
+                      <ion-card-header>
+                        <ion-card-title> <strong>ID:</strong> {{ item.id }}</ion-card-title>
+                      </ion-card-header>
+                      <ion-card-content>
+                        <strong>Fecha: </strong>{{ item.fecha }}<br>
+                        <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
+                        <strong>Finca:</strong> {{ item.fincaNombre }}<br>
+                        <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+                      </ion-card-content>
+                      <ion-row>
+                        <ion-col size="auto">
+                          <ion-button class="ion-margin" (click)="onShowForm(item)" size="small" color="success">
+                            <ion-icon name="create-outline" slot="start"></ion-icon> Seguimiento
+                          </ion-button>
+                        </ion-col>
+                      </ion-row>
+                    </ion-card>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </div>
+          </ion-accordion>
+        </ion-accordion-group>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

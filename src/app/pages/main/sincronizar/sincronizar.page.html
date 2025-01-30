@@ -140,6 +140,38 @@
           <td>{{ datos.fecha }}</td>
         </tr>
       </tbody>
+    </table> 
+
+    <h3>Prioridad</h3>
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of prioridades">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Estados</h3>
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of estados">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
     </table>   
 
   </div>

@@ -7,6 +7,7 @@ import { AlertController } from '@ionic/angular';
 import { BehaviorSubject } from 'rxjs';
 import { UsersService } from './users.service';
 import { Users } from '../models/users';
+import { Programacion } from '../models/programacion';
 
 
 @Injectable({
@@ -134,6 +135,49 @@ export class SqliteManagerService {
       console.error('Error al consultar los usuarios desde SQLite:', error);
       throw error;
     }
-  }  
+  }
 
+  async getProgramacion(): Promise<Programacion[]> {
+    const sql = `SELECT * FROM programacion`;
+    const db = await this.getDbName();
+  
+    try {
+      const response = await CapacitorSQLite.query({
+        database: db,
+        statement: sql,
+        values: []
+      });
+  
+      if (response.values && response.values.length > 0) {
+        return response.values.map(row => ({
+          id: row.id,
+          fecha: row.fecha,
+          lote: row.lote,
+          jornal: row.jornal,
+          cantidad: row.cantidad,
+          habilitado: row.habilitado,
+          sincronizado: row.sincronizado,
+          fecSincronizacion: row.fecSincronizacion,
+          observacion: row.observacion,
+          signo: row.signo,
+          maquina: row.maquina,
+          usuario: row.usuario,
+          usuarioMod: row.usuarioMod,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          sucursalId: row.sucursalId,
+          fincaId: row.fincaId,
+          actividadId: row.actividadId,
+          estadoId: row.estadoId,
+          prioridadId: row.prioridadId
+        }));
+      } else {
+        console.warn('No se encontraron programaciones en la base de datos.');
+        return [];
+      }
+    } catch (error) {
+      console.error('Error al obtener programaciones desde SQLite:', error);
+      throw error;
+    }
+  }  
 }

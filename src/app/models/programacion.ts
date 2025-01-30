@@ -19,4 +19,9 @@ export class Programacion{
     actividadId: number;
     estadoId: number;
     prioridadId: number;
+    actividadNombre?: string
+    fincaNombre?: string;
+    sucursalNombre?: string;
+    estadoNombre?: string;
+    prioridadNombre?: string;
 }

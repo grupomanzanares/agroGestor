@@ -1,13 +1,13 @@
 <ion-content>
-  <div class="logout-button-container">
-    <ion-button (click)="logout()" color="danger" class="logout-button">
-      <ion-icon name="log-out-outline" size="large" slot="end"></ion-icon>
-      Cerrar sesión
-    </ion-button>
-  </div>
   <ion-card class="menu-card">
     <app-header title="Menú Principal"></app-header>
-
+    <div class="logout-button-container">
+      <ion-button (click)="logout()" color="danger" class="logout-button">
+        <ion-icon name="log-out-outline" slot="end"></ion-icon>
+        Cerrar sesión
+      </ion-button>
+    </div>
+    
     <ion-card class="activi">
       <ion-card-header>
         <ion-card-title>Programacion</ion-card-title>
