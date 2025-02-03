@@ -38,8 +38,8 @@
     </ion-grid>
   </div>
 
-   <!-- Estado -->
-   <ion-grid fixed *ngIf="!seguimiento">
+  <!-- Estado -->
+  <ion-grid fixed *ngIf="!seguimiento">
     <ion-row>
       <ion-col size="12">
         <ion-accordion-group>
@@ -61,6 +61,7 @@
                         <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
                         <strong>Finca:</strong> {{ item.fincaNombre }}<br>
                         <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+                        <strong>Cantidad:</strong> {{ item.cantidad }}
                       </ion-card-content>
                       <ion-row>
                         <ion-col size="auto">
@@ -94,6 +95,7 @@
                         <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
                         <strong>Finca:</strong> {{ item.fincaNombre }}<br>
                         <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+                        <strong>Cantidad:</strong> {{ item.cantidad }}
                       </ion-card-content>
                       <ion-row>
                         <ion-col size="auto">
@@ -127,6 +129,7 @@
                         <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
                         <strong>Finca:</strong> {{ item.fincaNombre }}<br>
                         <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+                        <strong>Cantidad:</strong> {{ item.cantidad }}
                       </ion-card-content>
                       <ion-row>
                         <ion-col size="auto">
@@ -137,7 +140,7 @@
                       </ion-row>
                     </ion-card>
                   </ion-col>
-                  
+
                 </ion-row>
               </ion-grid>
             </div>
@@ -160,6 +163,7 @@
             <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
             <strong>Finca:</strong> {{ item.fincaNombre }}<br>
             <strong>Prioridad:</strong> {{ item.prioridadNombre }}<br>
+            <strong>Cantidad:</strong> {{ item.cantidad }} <br>
             <strong>Estado:</strong> {{ item.estadoNombre }}
           </ion-card-content>
           <ion-row>
@@ -183,6 +187,16 @@
         </ion-card-header>
         <ion-card-content [formGroup]="inputs">
 
+          <!-- Input de Estado -->
+          <ion-item>
+            <ion-label position="stacked">Estado</ion-label>
+            <ion-select interface="popover" placeholder="Estado" formControlName="estado">
+              <ion-select-option *ngFor="let item of nullestados(selectedProgramacion)" [value]="item.id">
+                {{ item.nombre }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
           <!-- Input de Actividad -->
           <ion-item>
             <ion-label position="stacked">Actividad</ion-label>
@@ -195,29 +209,43 @@
             <ion-input formControlName="finca" placeholder="Nombre de la finca"></ion-input>
           </ion-item>
 
-          <!-- Input de Estado -->
+          <!-- Input lote -->
+          <ion-item *ngIf="+selectedProgramacion?.controlPorLote === 1">
+            <ion-label position="stacked">Ingrese el lote</ion-label>
+            <ion-input type="text" formControlName="lote"></ion-input>
+          </ion-item>
+
+          <!-- Input cantidad -->
           <ion-item>
-            <ion-label position="stacked">Estado</ion-label>
-            <ion-select interface="popover" placeholder="Estado" formControlName="estado">
-              <ion-select-option *ngFor="let item of nullestados(selectedProgramacion)" [value]="item.id">
-                {{ item.nombre }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item>          
+            <ion-label position="stacked">Cantidad</ion-label>
+            <ion-input formControlName="cantidad" placeholder="Ingresa la cantidad"></ion-input>
+            <div class="error" *ngIf="inputs.controls['cantidad']?.errors && inputs.controls['cantidad']?.touched">
+              <samp *ngIf="inputs.controls['cantidad']?.errors?.['required']">Este campo es obligatorio</samp>
+            </div>            
+          </ion-item>
+
+          <!-- Input jornal -->
+          <ion-item>
+            <ion-label position="stacked">Jornal</ion-label>
+            <ion-input formControlName="jornal" placeholder="Ingresa el jornal"></ion-input>
+            <div class="error" *ngIf="inputs.controls['jornal']?.errors && inputs.controls['jornal']?.touched">
+              <span *ngIf="inputs.controls['jornal']?.errors?.['required']">Este campo es obligatorio</span>
+            </div>                              
+          </ion-item>
 
           <!-- Input de Observaciones -->
           <ion-item>
             <ion-label position="stacked">Observaciones</ion-label>
-            <ion-textarea formControlName="observaciones" placeholder="Escribe aquí" require></ion-textarea>
-            <div class="error" *ngIf="inputs.controls.observaciones.errors && inputs.controls.observaciones.touched">
-              <samp *ngIf="inputs.controls.observaciones.errors?.['required']">Este campo es obligatorio</samp>
-            </div>
+            <ion-textarea formControlName="observaciones" placeholder="Escribe aquí"></ion-textarea>
+            <div class="error" *ngIf="inputs.controls['observaciones']?.errors && inputs.controls['observaciones']?.touched">
+              <samp *ngIf="inputs.controls['observaciones']?.errors?.['required']">Este campo es obligatorio</samp>
+            </div>            
           </ion-item>
 
           <!-- Botones -->
           <ion-row>
             <ion-col size="6">
-              <ion-button expand="block" color="primary" (click)="saveChange(selectedProgramacion)">Guardar</ion-button>
+              <ion-button expand="block" color="primary" (click)="createFromExistingProgramacion(selectedProgramacion.id)">Guardar</ion-button>
             </ion-col>
             <ion-col size="6">
               <ion-button expand="block" color="danger" (click)="onCloseForm()">Cancelar</ion-button>

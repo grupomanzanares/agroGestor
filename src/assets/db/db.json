@@ -158,6 +158,7 @@
             "name": "programacion",
             "schema": [
                 { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "programacion", "value": "INTEGER NULL" },
                 { "column": "fecha", "value": "TEXT NULL" },
                 { "column": "lote", "value": "INTEGER NULL" },
                 { "column": "jornal", "value": "INTEGER NULL" },
@@ -178,6 +179,25 @@
                 { "column": "estadoId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(estadoId) REFERENCES estado(id)" },
                 { "column": "prioridadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(prioridadId) REFERENCES prioridad(id)" }
             ]
-        }        
+        },
+        {
+            "name": "fincalotes",
+            "schema": [
+                { "column": "lote", "value": "TEXT NOT NULL" },
+                { "column": "ccosto", "value": "TEXT NOT NULL" },
+                { "column": "nombre", "value": "TEXT NOT NULL" },
+                { "column": "descripcion", "value": "TEXT NOT NULL" },
+                { "column": "area", "value": "INTEGER" },
+                { "column": "plantas", "value": "INTEGER" },
+                { "column": "imagen", "value": "TEXT NULL" },
+                { "column": "habilitado", "value": "INTEGER" },
+                { "column": "usuario", "value": "TEXT NULL" },
+                { "column": "usuarioMod", "value": "TEXT NULL" },
+                { "column": "createdAt", "value": "TEXT NULL" },
+                { "column": "updatedAt", "value": "TEXT NULL" },
+                { "column": "finca", "value": "INTEGER NOT NULL" },
+                { "foreignkey": "finca", "value": "REFERENCES finca(id)" }
+            ]
+        }
     ]
 }

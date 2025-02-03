@@ -36,6 +36,7 @@ export class ProgramacionService {
       if (result.values) {
         const datos = await result.values.map(row => ({
           id: row.id,
+          programacion: row.programacion,
           fecha: row.fecha,
           lote: row.lote,
           jornal: row.jornal,
@@ -71,7 +72,8 @@ export class ProgramacionService {
     const sql = `
       SELECT 
         p.id,
-        p.fecha,
+        p.programacion,
+        DATE(p.fecha) AS fecha, -- Formatear la fecha para mostrar solo YYYY-MM-DD
         p.lote,
         p.jornal,
         p.cantidad,
@@ -85,7 +87,13 @@ export class ProgramacionService {
         p.usuarioMod,
         p.createdAt,
         p.updatedAt,
+        p.actividadId,
+        p.fincaId,
+        p.sucursalId,
+        p.estadoId,
+        p.prioridadId,
         a.nombre AS actividadNombre,
+        a.controlPorLote AS controlPorLote,
         f.nombre AS fincaNombre,
         s.nombre AS sucursalNombre,
         e.nombre AS estadoNombre,
@@ -96,8 +104,7 @@ export class ProgramacionService {
       LEFT JOIN finca f ON p.fincaId = f.id
       LEFT JOIN sucursal s ON p.sucursalId = s.id
       LEFT JOIN estado e ON p.estadoId = e.id
-      LEFT JOIN prioridad pr ON p.prioridadId = pr.id;
-    `;
+      LEFT JOIN prioridad pr ON p.prioridadId = pr.id;`;
     const db = await this.sqlService.getDbName();
 
     try {
@@ -110,6 +117,7 @@ export class ProgramacionService {
       if (response.values && response.values.length > 0) {
         return response.values.map(row => ({
           id: row.id,
+          programacion: row.programacion,
           fecha: row.fecha,
           lote: row.lote,
           jornal: row.jornal,
@@ -124,7 +132,13 @@ export class ProgramacionService {
           usuarioMod: row.usuarioMod,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
+          actividadId: row.actividadId || null, // Ahora sí tendrá el ID
+          fincaId: row.fincaId || null,
+          sucursalId: row.sucursalId || null,
+          estadoId: row.estadoId || null,
+          prioridadId: row.prioridadId || null,
           actividadNombre: row.actividadNombre || 'Sin nombre',
+          controlPorLote: row.controlPorLote || 0,
           fincaNombre: row.fincaNombre || 'Sin nombre',
           sucursalNombre: row.sucursalNombre || 'Sin nombre',
           estadoNombre: row.estadoNombre || 'Sin nombre',
@@ -224,6 +238,7 @@ export class ProgramacionService {
         let cambios = []
 
         if (datos.fecha !== undefined) cambios.push('fecha');
+        if (datos.programacion !== undefined) cambios.push('programacion');
         if (datos.lote !== undefined) cambios.push('lote');
         if (datos.jornal !== undefined) cambios.push('jornal');
         if (datos.cantidad !== undefined) cambios.push('cantidad');
@@ -249,6 +264,7 @@ export class ProgramacionService {
             {
               statement: sql,
               values: [
+                datos.programacion || null,
                 datos.fecha || null,
                 datos.lote || null,
                 datos.jornal || null,
@@ -287,8 +303,8 @@ export class ProgramacionService {
   async create(datosParaCrear: Programacion[], tabla: string) {
     const db = await this.sqlService.getDbName();
     const sql = `INSERT INTO ${tabla} 
-      (id, fecha, lote, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, fincaId, actividadId, estadoId, prioridadId) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      (id, programacion, fecha, lote, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, fincaId, actividadId, estadoId, prioridadId) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     try {
       for (const datos of datosParaCrear) {
@@ -305,6 +321,7 @@ export class ProgramacionService {
               statement: sql,
               values: [
                 datos.id,
+                datos.programacion,
                 datos.fecha,
                 datos.lote,
                 datos.jornal,
@@ -327,7 +344,7 @@ export class ProgramacionService {
               ]
             }]
           });
-          console.log(`Programacion con id ${datos.id} creada con exito: ${JSON.stringify(datos)}`);
+          console.log(`Programacion con id ${datos.id} creada con exito: ${datos}`, datos);
         } else {
           console.log(`Programacion con id ${datos.id} ya existe, omitiendo la insercion`);
         }

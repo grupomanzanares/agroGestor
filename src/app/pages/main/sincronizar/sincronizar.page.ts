@@ -4,6 +4,7 @@ import { ActividadService } from 'src/app/services/actividad.service';
 import { CategoriaService } from 'src/app/services/categoria.service';
 import { EstadoService } from 'src/app/services/estado.service';
 import { FincaService } from 'src/app/services/finca.service';
+import { FincaslotesService } from 'src/app/services/fincaslotes.service';
 import { PrioridadService } from 'src/app/services/prioridad.service';
 import { ProgramacionService } from 'src/app/services/programacion.service';
 import { SubcategoriaService } from 'src/app/services/subcategoria.service';
@@ -25,11 +26,11 @@ export class SincronizarPage implements OnInit {
   unidades: { id: number, nombre: string }[] = [];
   categorias: { id: number, nombre: string }[] = [];
   subcategorias: { id: number, nombre: string }[] = [];
-  actividades: {id: number, nombre: string} [] = []
-  programaciones: {id: number, fecha: string} [] = []
-  prioridades: {id: number, nombre: string} [] = []
-  estados: {id: number, nombre: string} [] = []
-
+  actividades: { id: number, nombre: string }[] = []
+  programaciones: { id: number, fecha: string }[] = []
+  prioridades: { id: number, nombre: string }[] = []
+  estados: { id: number, nombre: string }[] = []
+  lotes: { lote: string, nombre: string, finca: number, ccosto: string }[] = [];
 
   constructor(
     private fincaService: FincaService,
@@ -42,7 +43,8 @@ export class SincronizarPage implements OnInit {
     private toasService: ToastService,
     private programacionService: ProgramacionService,
     private prioridadService: PrioridadService,
-    private estadoService: EstadoService
+    private estadoService: EstadoService,
+    private loteService: FincaslotesService
   ) { }
 
   ngOnInit() {
@@ -61,6 +63,7 @@ export class SincronizarPage implements OnInit {
       const programacion = await this.programacionService.obtenerLocal('programacion')
       const prioridad = await this.prioridadService.obtenerLocal('prioridad')
       const estado = await this.estadoService.obtenerLocal('estado')
+      const lote = await this.loteService.obtenerDtLocal('fincalotes');
       this.users = (user)
       this.fincas = (finca)
       this.sucursales = (sucursal)
@@ -71,6 +74,7 @@ export class SincronizarPage implements OnInit {
       this.programaciones = (programacion)
       this.prioridades = (prioridad)
       this.estados = (estado)
+      this.lotes = (lote)
     } catch (error) {
       console.error('Error al cargar los datos locales:', error)
     }
@@ -82,30 +86,31 @@ export class SincronizarPage implements OnInit {
 
       if ((await conexion).connected) {
         const token = localStorage.getItem('token')
-  
+
         if (!token) {
           console.error('No se encontró un token. Asegúrate de que el usuario haya iniciado sesión.');
           this.toasService.presentToast('Asegúrate de haber iniciado sesión', 'danger', 'top')
           return;
         }
-  
+
         if (!this.usersService.token) {
           console.log('Generando token')
           const token = localStorage.getItem('token')
           console.log('Token generado')
         }
-  
+
         // Sincronizar datos usando el token ya existente
         await this.fincaService.sicronizarFinca('finca', 'finca');
         await this.usersService.sincronizarUsers('users', 'users');
         await this.sucursalService.sincronizar('sucursal', 'sucursal');
         await this.unidadService.sincronizar('unidad', 'unidad')
         await this.categoriaService.sincronizar('act-categoria', 'actcategoria')
-        await this.subcategoriaService.sincronizar('act-subcategoria', 'actsubcategoria' )
+        await this.subcategoriaService.sincronizar('act-subcategoria', 'actsubcategoria')
         await this.actividadesService.sincronizar('actividad', 'actividad')
         await this.programacionService.sincronizar('programacion', 'programacion')
         await this.prioridadService.sincronizar('prioridad', 'prioridad')
         await this.estadoService.sincronizar('estado', 'estado')
+        await this.loteService.sincronizarLote('fincalote', 'fincalotes');
         await this.cargar();
         console.log('Sincronización completada exitosamente.');
       } else {

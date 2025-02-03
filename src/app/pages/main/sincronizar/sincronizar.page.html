@@ -147,7 +147,7 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Fecha</th>
+          <th>Nombre</th>
         </tr>
       </thead>
       <tbody>
@@ -163,7 +163,7 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Fecha</th>
+          <th>Nombre</th>
         </tr>
       </thead>
       <tbody>
@@ -173,6 +173,22 @@
         </tr>
       </tbody>
     </table>   
+
+    <h3>Lotes</h3>
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>Lote</th>
+          <th>ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of lotes">
+          <td>{{ datos.lote }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table> 
 
   </div>
 </ion-content>

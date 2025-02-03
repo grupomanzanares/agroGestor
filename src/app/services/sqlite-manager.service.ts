@@ -151,6 +151,7 @@ export class SqliteManagerService {
       if (response.values && response.values.length > 0) {
         return response.values.map(row => ({
           id: row.id,
+          programacion: row.programacion,
           fecha: row.fecha,
           lote: row.lote,
           jornal: row.jornal,

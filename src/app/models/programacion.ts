@@ -1,10 +1,11 @@
 export class Programacion{
     id: number;
+    programacion: number;
     fecha: string;
     lote: number;
     jornal: number;
     cantidad: number;
-    habilitado: string;
+    habilitado: number;
     sincronizado: string;
     fecSincronizacion: string;
     observacion: string;

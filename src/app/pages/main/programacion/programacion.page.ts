@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { observeNotification } from 'rxjs/internal/Notification';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Estado } from 'src/app/models/estado';
 import { Prioridad } from 'src/app/models/prioridad';
 import { Programacion } from 'src/app/models/programacion';
 import { EstadoService } from 'src/app/services/estado.service';
+import { FincaslotesService } from 'src/app/services/fincaslotes.service';
 import { PrioridadService } from 'src/app/services/prioridad.service';
 import { ProgramacionService } from 'src/app/services/programacion.service';
 import { SqliteManagerService } from 'src/app/services/sqlite-manager.service';
@@ -28,11 +28,15 @@ export class ProgramacionPage implements OnInit {
   estados: Estado[] = [];
   filterPriori: string = null;
   selectedProgramacion: any = null;
+  lotes: any[] = []
+  lotesDisponibles: any[] = [];
 
-  public inputs = new FormGroup({
+  public inputs = new FormGroup<{ [key: string]: AbstractControl<any, any> }>({
     actividad: new FormControl({ value: '', disabled: true }),
     estado: new FormControl(),
     finca: new FormControl({ value: '', disabled: true }),
+    cantidad: new FormControl(0, [Validators.required]),
+    jornal: new FormControl(0, [Validators.required]),
     observaciones: new FormControl('', [Validators.required])
   })
 
@@ -41,7 +45,8 @@ export class ProgramacionPage implements OnInit {
     private sqliteService: SqliteManagerService,
     private prioridadService: PrioridadService,
     private estadoService: EstadoService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private lotesService: FincaslotesService
   ) {
     this.seguimiento = false
   }
@@ -50,9 +55,12 @@ export class ProgramacionPage implements OnInit {
     this.getprogramacion();
     this.getPrioridad();
     this.getEstado()
+    this.getLotes()
   }
-
+  
   async onShowForm(programacion: Programacion) {
+    console.log('Programación seleccionada:', programacion);
+  
     const estado = this.estados.find(e => e.nombre === programacion.estadoNombre);
     const estadoId = estado ? estado.id : null;
   
@@ -70,7 +78,21 @@ export class ProgramacionPage implements OnInit {
       finca: programacion.fincaNombre,
       observaciones: programacion.observacion,
     });
-  }  
+  
+    if (Array.isArray(this.lotes)) {
+      this.lotesDisponibles = this.lotes.filter(lote => lote.finca === programacion.fincaNombre);
+      console.log('Lotes disponibles para la finca seleccionada:', programacion.fincaNombre,this.lotesDisponibles);
+    } else {
+      console.error('Error: "lotes" no es un array:', this.lotes);
+      this.lotesDisponibles = [];
+    }
+  
+    if (Number(this.selectedProgramacion.controlPorLote) === 1) {
+      this.inputs.addControl('lote', new FormControl('', Validators.required));
+    } else {
+      this.inputs.removeControl('lote');
+    }
+  }
 
   onCloseForm() {
     this.seguimiento = false; // Ocultar el formulario
@@ -107,6 +129,16 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
+  async getLotes() {
+    try {
+      this.lotes = await this.lotesService.obtenerDtLocal('fincalotes') || []
+      console.log('Lotes cargados:', this.lotes)
+    } catch (error) {
+      console.error('Error al cargar los lotes')
+      this.lotes = []
+    }
+  }
+
   filter() {
     if (this.filterPriori) {
       this.filteredProgramaciones = this.programaciones.filter((p) => p.prioridadNombre === this.filterPriori);
@@ -136,10 +168,10 @@ export class ProgramacionPage implements OnInit {
     if (!programacion || !programacion.estadoId) {
       return []; // Retorna un arreglo vacío si no hay programación seleccionada
     }
-  
+
     // Filtra los estados que tienen un ID mayor o igual al estado actual
     return this.estados.filter(e => e.id >= programacion.estadoId);
-  }  
+  }
 
   //Funciion para guardar el proceso y los comentarios  en que va la programacion
   saveChange(programacion: any) {
@@ -148,20 +180,20 @@ export class ProgramacionPage implements OnInit {
       this.toastService.presentToast('Por favor completa los campos obligatorios', 'danger', 'top');
       return;
     }
-  
+
     const nuevoEstadoId = this.inputs.get('estado')?.value;
     if (nuevoEstadoId < programacion.estadoId) {
       this.toastService.presentToast('No puedes seleccionar un estado anterior', 'danger', 'top');
       return;
     }
-  
+
     const data = {
       ...programacion,
       estadoId: nuevoEstadoId,
       observacion: this.inputs.get('observaciones')?.value,
       updatedAt: new Date().toISOString()
     };
-  
+
     this.programacionService.updateEst([data], 'programacion')
       .then(() => {
         this.toastService.presentToast('Cambios guardados correctamente', 'success', 'top');
@@ -177,5 +209,64 @@ export class ProgramacionPage implements OnInit {
         this.toastService.presentToast('Error al guardar los cambios', 'danger', 'top');
       });
   }
+
+  async createFromExistingProgramacion(baseProgramacionId: number) {
+    // Buscar la programación original
+    const baseProgramacion = this.programaciones.find(prog => prog.id === baseProgramacionId);
   
+    if (!baseProgramacion) {
+      this.toastService.presentToast('No se encontró la programación base', 'danger', 'top');
+      return;
+    }
+  
+    if (this.inputs.invalid) {
+      this.inputs.markAllAsTouched();
+      this.toastService.presentToast('Por favor completa los campos obligatorios', 'danger', 'top');
+      return;
+    }
+  
+    // Calcular el nuevo ID basado en el ID original
+    const registrosRelacionados = this.programaciones.filter(prog => Math.floor(prog.id / 100) === baseProgramacionId);
+    const ultimoRegistro = registrosRelacionados.length > 0 ? Math.max(...registrosRelacionados.map(prog => prog.id)) : baseProgramacionId * 100;
+    const nuevoId = ultimoRegistro + 1; // Generar nuevo ID consecutivo
+  
+    // Crear la nueva programación tomando como base la original
+    const nuevaProgramacion: Programacion = {
+      id: nuevoId,
+      programacion: baseProgramacion.id,
+      fecha: this.inputs.get('fecha')?.value || new Date().toISOString(), // Tomar del formulario o fecha actual
+      lote: this.inputs.get('lote')?.value || baseProgramacion.lote,
+      jornal: this.inputs.get('jornal')?.value || baseProgramacion.jornal,
+      cantidad: this.inputs.get('cantidad')?.value || baseProgramacion.cantidad,
+      habilitado: 1, // Activado por defecto
+      sincronizado: '', // No sincronizado aún
+      fecSincronizacion: null, // Fecha de sincronización vacía
+      observacion: this.inputs.get('observaciones')?.value || baseProgramacion.observacion,
+      signo: 1,
+      maquina: '',
+      usuario: localStorage.getItem('userName'), // Cambiar según lógica de autenticación
+      usuarioMod: localStorage.getItem('userName'),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      sucursalId: baseProgramacion.sucursalId,
+      fincaId: baseProgramacion.fincaId,
+      actividadId: baseProgramacion.actividadId,
+      estadoId: this.inputs.get('estado')?.value || baseProgramacion.estadoId,
+      prioridadId: baseProgramacion.prioridadId
+    };
+  
+    try {
+      // Insertar la nueva programación en la base de datos
+      await this.programacionService.create([nuevaProgramacion], 'programacion');
+      this.toastService.presentToast('Nueva programación creada con éxito', 'success', 'top');
+      this.getprogramacion(); // Actualizar la lista de programaciones
+      this.inputs.reset()
+      this.onCloseForm(); // Cerrar el formulario
+    } catch (error) {
+      console.error('Error al crear nueva programación:', error);
+      this.toastService.presentToast('Error al crear nueva programación', 'danger', 'top');
+    }
+  }
+  
+
 }
