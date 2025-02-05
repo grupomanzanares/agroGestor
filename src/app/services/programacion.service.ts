@@ -73,7 +73,7 @@ export class ProgramacionService {
       SELECT 
         p.id,
         p.programacion,
-        DATE(p.fecha) AS fecha, -- Formatear la fecha para mostrar solo YYYY-MM-DD
+        DATE(p.fecha) AS fecha, 
         p.lote,
         p.jornal,
         p.cantidad,
@@ -104,7 +104,7 @@ export class ProgramacionService {
       LEFT JOIN finca f ON p.fincaId = f.id
       LEFT JOIN sucursal s ON p.sucursalId = s.id
       LEFT JOIN estado e ON p.estadoId = e.id
-      LEFT JOIN prioridad pr ON p.prioridadId = pr.id;`;
+      LEFT JOIN prioridad pr ON p.prioridadId = pr.id`;
     const db = await this.sqlService.getDbName();
 
     try {
@@ -197,7 +197,7 @@ export class ProgramacionService {
     }
 
     const db = await this.sqlService.getDbName();
-    const sql = ` UPDATE ${tabla} SET estadoId=?, observacion=?, updatedAt=? WHERE id = ?`;
+    const sql = ` UPDATE ${tabla} SET estadoId=?, usuarioMod=?, updatedAt=? WHERE id = ?`;
 
     try {
       for (const datos of datosDiferentes) {
@@ -208,7 +208,7 @@ export class ProgramacionService {
               statement: sql,
               values: [
                 datos.estadoId || null,
-                datos.observacion || null,
+                datos.usuarioMod || null,
                 datos.updatedAt || null,
                 datos.id
               ]

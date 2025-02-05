@@ -33,7 +33,7 @@ export class ProgramacionPage implements OnInit {
 
   public inputs = new FormGroup<{ [key: string]: AbstractControl<any, any> }>({
     actividad: new FormControl({ value: '', disabled: true }),
-    estado: new FormControl(),
+    estado: new FormControl({ value: '', disabled: true }),
     finca: new FormControl({ value: '', disabled: true }),
     cantidad: new FormControl(0, [Validators.required]),
     jornal: new FormControl(0, [Validators.required]),
@@ -42,7 +42,6 @@ export class ProgramacionPage implements OnInit {
 
   constructor(
     private programacionService: ProgramacionService,
-    private sqliteService: SqliteManagerService,
     private prioridadService: PrioridadService,
     private estadoService: EstadoService,
     private toastService: ToastService,
@@ -57,36 +56,36 @@ export class ProgramacionPage implements OnInit {
     this.getEstado()
     this.getLotes()
   }
-  
+
   async onShowForm(programacion: Programacion) {
     console.log('Programación seleccionada:', programacion);
-  
+
     const estado = this.estados.find(e => e.nombre === programacion.estadoNombre);
     const estadoId = estado ? estado.id : null;
-  
+
     this.selectedProgramacion = {
       ...programacion,
       estadoId
     };
-  
+
     this.seguimiento = true; // Mostrar el formulario
-  
+
     // Inicializar los valores del formulario
     this.inputs.patchValue({
       actividad: programacion.actividadNombre,
-      estado: estadoId,
+      estado: programacion.estadoNombre,
       finca: programacion.fincaNombre,
       observaciones: programacion.observacion,
     });
-  
-    if (Array.isArray(this.lotes)) {
-      this.lotesDisponibles = this.lotes.filter(lote => lote.finca === programacion.fincaNombre);
-      console.log('Lotes disponibles para la finca seleccionada:', programacion.fincaNombre,this.lotesDisponibles);
-    } else {
-      console.error('Error: "lotes" no es un array:', this.lotes);
-      this.lotesDisponibles = [];
-    }
-  
+
+    // if (Array.isArray(this.lotes)) {
+    //   this.lotesDisponibles = this.lotes.filter(lote => lote.finca === programacion.fincaNombre);
+    //   console.log('Lotes disponibles para la finca seleccionada:', programacion.fincaNombre,this.lotesDisponibles);
+    // } else {
+    //   console.error('Error: "lotes" no es un array:', this.lotes);
+    //   this.lotesDisponibles = [];
+    // }
+
     if (Number(this.selectedProgramacion.controlPorLote) === 1) {
       this.inputs.addControl('lote', new FormControl('', Validators.required));
     } else {
@@ -213,23 +212,31 @@ export class ProgramacionPage implements OnInit {
   async createFromExistingProgramacion(baseProgramacionId: number) {
     // Buscar la programación original
     const baseProgramacion = this.programaciones.find(prog => prog.id === baseProgramacionId);
-  
+
     if (!baseProgramacion) {
       this.toastService.presentToast('No se encontró la programación base', 'danger', 'top');
       return;
     }
-  
+
     if (this.inputs.invalid) {
       this.inputs.markAllAsTouched();
       this.toastService.presentToast('Por favor completa los campos obligatorios', 'danger', 'top');
       return;
     }
-  
+
     // Calcular el nuevo ID basado en el ID original
-    const registrosRelacionados = this.programaciones.filter(prog => Math.floor(prog.id / 100) === baseProgramacionId);
-    const ultimoRegistro = registrosRelacionados.length > 0 ? Math.max(...registrosRelacionados.map(prog => prog.id)) : baseProgramacionId * 100;
+    const registrosRelacionados = this.programaciones.filter(prog => Math.floor(prog.id / 1000) === baseProgramacionId);
+    const ultimoRegistro = registrosRelacionados.length > 0 ? Math.max(...registrosRelacionados.map(prog => prog.id)) : baseProgramacionId * 1000;
     const nuevoId = ultimoRegistro + 1; // Generar nuevo ID consecutivo
-  
+
+    // Calcular la suma de las cantidades de programaciones relacionadas
+    const sumaCantidadesRelacionadas = registrosRelacionados.reduce(
+      (suma, prog) => suma + prog.cantidad, 0);
+
+    // Verificar si la suma de cantidades alcanza o supera la cantidad de la programación original
+    const cantidadTotal = sumaCantidadesRelacionadas + (this.inputs.get('cantidad')?.value || 0); // Incluir la cantidad de la nueva programación
+    const nuevoEstadoId = cantidadTotal >= baseProgramacion.cantidad ? 3 : 2; // Estado: 3 = Terminado, 2 = En Proceso
+
     // Crear la nueva programación tomando como base la original
     const nuevaProgramacion: Programacion = {
       id: nuevoId,
@@ -242,7 +249,7 @@ export class ProgramacionPage implements OnInit {
       sincronizado: '', // No sincronizado aún
       fecSincronizacion: null, // Fecha de sincronización vacía
       observacion: this.inputs.get('observaciones')?.value || baseProgramacion.observacion,
-      signo: 1,
+      signo: -1,
       maquina: '',
       usuario: localStorage.getItem('userName'), // Cambiar según lógica de autenticación
       usuarioMod: localStorage.getItem('userName'),
@@ -251,22 +258,32 @@ export class ProgramacionPage implements OnInit {
       sucursalId: baseProgramacion.sucursalId,
       fincaId: baseProgramacion.fincaId,
       actividadId: baseProgramacion.actividadId,
-      estadoId: this.inputs.get('estado')?.value || baseProgramacion.estadoId,
+      estadoId: nuevoEstadoId, // Usar el estado calculado
       prioridadId: baseProgramacion.prioridadId
     };
-  
+
     try {
+      // Actualizar la programación original si corresponde
+      if (nuevoEstadoId === 3) {
+        const updateOriginal = {
+          ...baseProgramacion,
+          estadoId: 3, // Terminado
+          updatedAt: new Date().toISOString(),
+          usuarioMod: localStorage.getItem('userName')
+        };
+        await this.programacionService.updateEst([updateOriginal], 'programacion');
+      }
+
       // Insertar la nueva programación en la base de datos
       await this.programacionService.create([nuevaProgramacion], 'programacion');
       this.toastService.presentToast('Nueva programación creada con éxito', 'success', 'top');
       this.getprogramacion(); // Actualizar la lista de programaciones
-      this.inputs.reset()
+      this.inputs.reset();
       this.onCloseForm(); // Cerrar el formulario
     } catch (error) {
       console.error('Error al crear nueva programación:', error);
       this.toastService.presentToast('Error al crear nueva programación', 'danger', 'top');
     }
   }
-  
 
 }

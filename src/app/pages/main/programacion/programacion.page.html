@@ -186,15 +186,10 @@
           <ion-card-title>Formulario de Seguimiento</ion-card-title>
         </ion-card-header>
         <ion-card-content [formGroup]="inputs">
-
-          <!-- Input de Estado -->
+          
           <ion-item>
             <ion-label position="stacked">Estado</ion-label>
-            <ion-select interface="popover" placeholder="Estado" formControlName="estado">
-              <ion-select-option *ngFor="let item of nullestados(selectedProgramacion)" [value]="item.id">
-                {{ item.nombre }}
-              </ion-select-option>
-            </ion-select>
+            <ion-input formControlName="estado" placeholder="Estado"></ion-input>
           </ion-item>
 
           <!-- Input de Actividad -->

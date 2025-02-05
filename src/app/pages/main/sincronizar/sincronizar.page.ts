@@ -11,6 +11,7 @@ import { SubcategoriaService } from 'src/app/services/subcategoria.service';
 import { SucursalService } from 'src/app/services/sucursal.service';
 import { ToastService } from 'src/app/services/toast.service';
 import { UnidadService } from 'src/app/services/unidad.service';
+import { UploadDataService } from 'src/app/services/upload-data.service';
 import { UsersService } from 'src/app/services/users.service';
 
 @Component({
@@ -44,7 +45,8 @@ export class SincronizarPage implements OnInit {
     private programacionService: ProgramacionService,
     private prioridadService: PrioridadService,
     private estadoService: EstadoService,
-    private loteService: FincaslotesService
+    private loteService: FincaslotesService,
+    private uploadDataService: UploadDataService
   ) { }
 
   ngOnInit() {
@@ -93,12 +95,6 @@ export class SincronizarPage implements OnInit {
           return;
         }
 
-        if (!this.usersService.token) {
-          console.log('Generando token')
-          const token = localStorage.getItem('token')
-          console.log('Token generado')
-        }
-
         // Sincronizar datos usando el token ya existente
         await this.fincaService.sicronizarFinca('finca', 'finca');
         await this.usersService.sincronizarUsers('users', 'users');
@@ -120,6 +116,31 @@ export class SincronizarPage implements OnInit {
       // Verificar si el token ya está disponible
     } catch (error) {
       console.error('Error en la sincronización:', error);
+    }
+  }
+
+  async subirDatos() {
+    const conexion = Network.getStatus();
+    try {
+      if ((await conexion).connected) {
+
+        console.log("Iniciando subida de datos...");
+
+        // Llamar a la función de sincronización del `UploadDataService`
+        const sincronizacionExitosa = await this.uploadDataService.sincronizacion('programacion', 'programacion');
+
+        if (sincronizacionExitosa) {
+          this.toasService.presentToast('Datos subidos correctamente', 'success', 'top');
+        } else {
+          this.toasService.presentToast('No hubo cambios para sincronizar', 'warning', 'top');
+        }
+
+      } else {
+        this.toasService.presentToast('Debes tener conexión a internet para hacer esto', 'danger', 'top');
+      }
+    } catch (error) {
+      console.error('Error al subir datos:', error);
+      this.toasService.presentToast('Error al subir datos', 'danger', 'top');
     }
   }
 }
