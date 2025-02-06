@@ -2,11 +2,11 @@ export class Programacion{
     id: number;
     programacion: number;
     fecha: string;
-    lote: number;
+    lote: string;
     jornal: number;
     cantidad: number;
     habilitado: number;
-    sincronizado: string;
+    sincronizado: number;
     fecSincronizacion: string;
     observacion: string;
     signo: number;

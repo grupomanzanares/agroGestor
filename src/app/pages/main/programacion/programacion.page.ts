@@ -60,6 +60,11 @@ export class ProgramacionPage implements OnInit {
   async onShowForm(programacion: Programacion) {
     console.log('Programación seleccionada:', programacion);
 
+    if (programacion.sincronizado === 1) {
+      this.toastService.presentToast('No puedes abrir la programacion si ya fue sincronizada', 'danger', top)
+      return
+    }
+
     const estado = this.estados.find(e => e.nombre === programacion.estadoNombre);
     const estadoId = estado ? estado.id : null;
 
@@ -77,14 +82,6 @@ export class ProgramacionPage implements OnInit {
       finca: programacion.fincaNombre,
       observaciones: programacion.observacion,
     });
-
-    // if (Array.isArray(this.lotes)) {
-    //   this.lotesDisponibles = this.lotes.filter(lote => lote.finca === programacion.fincaNombre);
-    //   console.log('Lotes disponibles para la finca seleccionada:', programacion.fincaNombre,this.lotesDisponibles);
-    // } else {
-    //   console.error('Error: "lotes" no es un array:', this.lotes);
-    //   this.lotesDisponibles = [];
-    // }
 
     if (Number(this.selectedProgramacion.controlPorLote) === 1) {
       this.inputs.addControl('lote', new FormControl('', Validators.required));
@@ -242,12 +239,12 @@ export class ProgramacionPage implements OnInit {
       id: nuevoId,
       programacion: baseProgramacion.id,
       fecha: this.inputs.get('fecha')?.value || new Date().toISOString(), // Tomar del formulario o fecha actual
-      lote: this.inputs.get('lote')?.value || baseProgramacion.lote,
+      lote: this.inputs.get('lote')?.value || "",
       jornal: this.inputs.get('jornal')?.value || baseProgramacion.jornal,
       cantidad: this.inputs.get('cantidad')?.value || baseProgramacion.cantidad,
       habilitado: 1, // Activado por defecto
-      sincronizado: '', // No sincronizado aún
-      fecSincronizacion: null, // Fecha de sincronización vacía
+      sincronizado: 0, 
+      fecSincronizacion: new Date().toISOString(), // Fecha de sincronización vacía
       observacion: this.inputs.get('observaciones')?.value || baseProgramacion.observacion,
       signo: -1,
       maquina: '',

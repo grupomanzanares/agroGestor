@@ -160,7 +160,7 @@
                 { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
                 { "column": "programacion", "value": "INTEGER NULL" },
                 { "column": "fecha", "value": "TEXT NULL" },
-                { "column": "lote", "value": "INTEGER NULL" },
+                { "column": "lote", "value": "TEXT NULL" },
                 { "column": "jornal", "value": "INTEGER NULL" },
                 { "column": "cantidad", "value": "INTEGER NULL" },
                 { "column": "habilitado", "value": "INTEGER" },

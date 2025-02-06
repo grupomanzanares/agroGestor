@@ -20,28 +20,38 @@ export class UploadDataService {
   ) { }
 
   obtenerVpsDatos(endPoint: string) {
-    return this.http.get<Programacion[]>(`${this.apiUrl}${endPoint}`);
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    })
+    return this.http.get<Programacion[]>(`${this.apiUrl}${endPoint}`, { headers })
   }
 
   async comparacion(endPoint: string, tabla: string) {
     try {
       const vpsDatos = await lastValueFrom(this.obtenerVpsDatos(endPoint));
-      console.log(vpsDatos)
+
+      if (!Array.isArray(vpsDatos)) {
+        console.error("Error: la api no devolvio un array valido", vpsDatos)
+      }
+
       const localDatos = await this.programacion.obtenerLocal(tabla);
 
-      if (!localDatos.length) {
-        console.log('No hay datos locales disponibles para sincronizar con el VPS.');
-        return { update: [], create: [] };
+      if (!Array.isArray(localDatos)) {
+        console.error("No hay datos locales disponibles para sincronizar con el VPS")
       }
 
       // Filtrar los datos locales que NO están en el VPS (Datos Nuevos)
       const datosParaCrear = localDatos.filter(localDato => {
-        return !vpsDatos.some(vpsItem => String(vpsItem.id) === String(localDato.id));
+        const localId = localDato.id ? String(localDato.id) : null;
+        return localId && !vpsDatos.some(vpsItem => vpsItem.id && String(vpsItem.id) === localId);
       });
 
       // Filtrar los datos que YA existen en el VPS pero han cambiado (Datos para Update)
       const datosParaActualizar = localDatos.filter(localDato => {
-        const vpsItem = vpsDatos.find(vps => String(vps.id) === String(localDato.id));
+        const localId = localDato.id ? String(localDato.id) : null;
+        const vpsItem = vpsDatos.find(vps => vps.id && String(vps.id) === localId);
+
         if (!vpsItem) return false; // Si no existe en VPS, no se actualiza
         return JSON.stringify(vpsItem) !== JSON.stringify(localDato); // Comparación profunda
       });
@@ -86,7 +96,6 @@ export class UploadDataService {
   async subirDatos(datos: any, endPoint: string): Promise<boolean> {
     try {
       const token = localStorage.getItem('token');
-      console.log('token', token)
       if (!token) {
         console.error("No hay token disponible, no se puede autenticar la solicitud.");
         this.toast.presentToast('Error de autenticación', 'danger', 'top');
@@ -100,13 +109,31 @@ export class UploadDataService {
 
       console.log("Enviando datos nuevos al VPS:", datos);
 
-      const url = `${this.apiUrl}${endPoint}`
+      let camId = []
 
-      const response = await lastValueFrom(
-        this.http.post(url, datos, { headers })
-      );
+      for (const dato of datos) {
+        const url = `${this.apiUrl}${endPoint}/create`
+        console.log('Enviando datos al vps en:', url)
 
-      console.log("Respuesta del VPS:", response);
+        dato.sincronizado = 1
+  
+        const response: any = await lastValueFrom(
+          this.http.post(url, dato, { headers })
+        );
+        console.log("Respuesta del VPS:", response);
+
+        if (response && response.id) {
+          camId.push({
+            idLocal: dato.id,
+            nuevoId: response.id
+          })
+        }
+
+        if (camId.length > 0) {
+          await this.programacion.updateId(camId, 'programacion')
+        }
+      }
+
       this.toast.presentToast('Datos nuevos sincronizados correctamente', 'success', 'top');
       return true;
     } catch (error) {
@@ -116,7 +143,7 @@ export class UploadDataService {
     }
   }
 
-  async actualizarDatos(datos: any, endPoint: string): Promise<boolean> {
+  async actualizarDatos(datos: any[], endPoint: string): Promise<boolean> {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -124,19 +151,30 @@ export class UploadDataService {
         this.toast.presentToast('Error de autenticación', 'danger', 'top');
         return false;
       }
-
+  
       const headers = new HttpHeaders({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       });
-
-      console.log("Actualizando datos existentes en el VPS:", datos);
-
-      const response = await lastValueFrom(
-        this.http.put(`${this.apiUrl}${endPoint}`, datos, { headers }) // Cambia a `PUT` para actualizar registros
-      );
-
-      console.log("Respuesta del VPS:", response);
+  
+      console.log("Datos a actualizar:", datos);
+  
+      for (const item of datos) {
+        if (!item.id) {
+          console.error("Error: El objeto a actualizar no tiene un ID válido", item);
+          continue; // Saltar este item si no tiene ID
+        }
+  
+        const url = `${this.apiUrl}${endPoint}/${item.id}`; // Se agrega el ID en la URL
+        console.log("Actualizando registro en:", url);
+  
+        const response = await lastValueFrom(
+          this.http.put(url, item, { headers }) // Ahora incluye el ID en la URL
+        );
+  
+        console.log("Respuesta del VPS:", response);
+      }
+  
       this.toast.presentToast('Datos actualizados correctamente en el VPS', 'success', 'top');
       return true;
     } catch (error) {

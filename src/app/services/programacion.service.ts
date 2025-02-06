@@ -378,4 +378,25 @@ export class ProgramacionService {
     }
   }
 
+  async updateId(datos: any[], tabla: string) {
+
+    const db = await this.sqlService.getDbName();
+    const sql = `UPDATE ${tabla} SET id = ? WHERE id = ?`
+
+    try {
+    const updates = datos.map(dato => ({
+      statement: sql,
+      values: [dato.nuevoId, dato.idLocal] // Asegúrate de que estos valores estén bien asignados
+    }));
+
+    await CapacitorSQLite.executeSet({
+      database: db,
+      set: updates
+    });
+    } catch (error) {
+      console.error('Error al actualizar los datos:', error);
+      throw error;
+    }
+  }
+
 }
