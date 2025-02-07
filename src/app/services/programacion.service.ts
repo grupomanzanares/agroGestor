@@ -381,7 +381,7 @@ export class ProgramacionService {
   async updateId(datos: any[], tabla: string) {
 
     const db = await this.sqlService.getDbName();
-    const sql = `UPDATE ${tabla} SET id = ? WHERE id = ?`
+    const sql = `UPDATE ${tabla} SET id = ?, sincronizado = 1 WHERE id = ?`
 
     try {
     const updates = datos.map(dato => ({
