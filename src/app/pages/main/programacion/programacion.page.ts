@@ -62,6 +62,7 @@ export class ProgramacionPage implements OnInit {
 
     if (programacion.sincronizado === 1) {
       this.toastService.presentToast('No puedes abrir la programacion si ya fue sincronizada', 'danger', top)
+      console.log('no')
       return
     }
 
@@ -273,7 +274,7 @@ export class ProgramacionPage implements OnInit {
 
       // Insertar la nueva programación en la base de datos
       await this.programacionService.create([nuevaProgramacion], 'programacion');
-      this.toastService.presentToast('Nueva programación creada con éxito', 'success', 'top');
+      this.toastService.presentToast('Registro realizado', 'success', 'top');
       this.getprogramacion(); // Actualizar la lista de programaciones
       this.inputs.reset();
       this.onCloseForm(); // Cerrar el formulario
