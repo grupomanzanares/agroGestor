@@ -34,7 +34,7 @@ export class ActividadService {
         values: []
       });
   
-      console.log('Resultado de la consulta local:', result);
+      // console.log('Resultado de la consulta local:', result);
   
       if (result.values) {
         const datos = result.values.map(row => ({
@@ -50,7 +50,7 @@ export class ActividadService {
           unidadId: row.unidadId,
           subCategoriaId: row.subCategoriaId
         }));
-        console.log('Datos procesados localmente:', datos);
+        // console.log('Datos procesados localmente:', datos);
         return datos;
       } else {
         throw new Error('No se encontraron datos en la base de datos local');
@@ -69,8 +69,8 @@ export class ActividadService {
       map(result => {
         const { vpsDatos, localDatos } = result;
   
-        console.log('Datos del VPS:', vpsDatos);
-        console.log('Datos locales:', localDatos);
+        // console.log('Datos del VPS:', vpsDatos);
+        // console.log('Datos locales:', localDatos);
   
         if (localDatos.length === 0) {
           console.log('No hay datos locales, todos los datos del VPS serán creados');
@@ -101,7 +101,6 @@ export class ActividadService {
       })
     );
   }
-  
 
   async update(datosDiferentes: Actividad[], tabla: string) {
     console.log(`Datos diferentes recibidos para actualizar: ${datosDiferentes}`)
@@ -164,7 +163,7 @@ export class ActividadService {
   
     try {
       for (const datos of datosParaCrear) {
-        console.log('Intentando insertar:', datos);
+        // console.log('Intentando insertar:', datos);
   
         const exsDatos = await CapacitorSQLite.query({
           database: db,
@@ -192,23 +191,22 @@ export class ActividadService {
               ]
             }]
           });
-          console.log(`Actividad con id ${datos.id} creada exitosamente`);
+          // console.log(`Actividad con id ${datos.id} creada exitosamente`);
         } else {
-          console.log(`Actividad con id ${datos.id} ya existe, omitiendo la inserción`);
+          // console.log(`Actividad con id ${datos.id} ya existe, omitiendo la inserción`);
         }
       }
     } catch (error) {
       console.error('Error al crear nuevos datos:', error);
     }
   }
-  
 
   async sincronizar(endPoint: string, tabla: string) {
     try {
       const { update, create } = await lastValueFrom(this.comparacion(endPoint, tabla));
   
-      console.log('Datos para actualizar:', update);
-      console.log('Datos para crear:', create);
+      // console.log('Datos para actualizar:', update);
+      // console.log('Datos para crear:', create);
   
       if (update.length > 0) {
         await this.update(update, tabla);

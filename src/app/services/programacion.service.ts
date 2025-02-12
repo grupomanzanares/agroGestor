@@ -57,7 +57,7 @@ export class ProgramacionService {
           estadoId: row.estadoId,
           prioridadId: row.prioridadId
         }))
-        console.log('Programaciones obtenidas', datos)
+        // console.log('Programaciones obtenidas', datos)
         return datos;
       } else {
         throw new Error('No se encontraron datos de la programacion en la base de datos')
@@ -162,8 +162,8 @@ export class ProgramacionService {
       map(result => {
         const { vpsDatos, localDatos } = result;
 
-        console.log('Datos del VPS:', vpsDatos);
-        console.log('Datos locales:', localDatos);
+        // console.log('Datos del VPS:', vpsDatos);
+        // console.log('Datos locales:', localDatos);
 
         if (localDatos.length === 0) {
           console.log('No hay datos locales, todos los datos del VPS serán creados.');
@@ -344,9 +344,9 @@ export class ProgramacionService {
               ]
             }]
           });
-          console.log(`Programacion con id ${datos.id} creada con exito: ${datos}`, datos);
+          // console.log(`Programacion con id ${datos.id} creada con exito: ${datos}`, datos);
         } else {
-          console.log(`Programacion con id ${datos.id} ya existe, omitiendo la insercion`);
+          // console.log(`Programacion con id ${datos.id} ya existe, omitiendo la insercion`);
         }
       }
     } catch (error) {

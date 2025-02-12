@@ -165,9 +165,9 @@ export class SucursalService {
               ]
             }]
           });
-          console.log(`Sucursal con id ${datos.id} creado exitosamente: ${datos}`)
+          // console.log(`Sucursal con id ${datos.id} creado exitosamente: ${datos}`)
         } else {
-          console.log(`Sucursal con id ${datos.id} ya existe, omitiendo la inserción`)
+          // console.log(`Sucursal con id ${datos.id} ya existe, omitiendo la inserción`)
         }
       }
     } catch (error) {
@@ -181,14 +181,14 @@ export class SucursalService {
 
       if (update.length > 0) {
         await this.update(update, tabla)
-        console.log(`Sucursal actualizada con exito`)
+        // console.log(`Sucursal actualizada con exito`)
       } else {
-        console.log(`No hay datos que actualizar`)
+        // console.log(`No hay datos que actualizar`)
       }
 
       if (create.length > 0) {
         await this.create(create, tabla)
-        console.log('Datos de sucursal insertados correctamente')
+        // console.log('Datos de sucursal insertados correctamente')
       }
 
       if (update.length === 0 && create.length === 0) {

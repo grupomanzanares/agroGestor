@@ -27,17 +27,17 @@ export class MainPage implements OnInit {
       switch (targetId) {
         case 'actividades':
           this.router.navigateByUrl('programacion');
-          console.log('Navegando a: main/actividades');
+          // console.log('Navegando a: main/actividades');
           break;
 
         case 'sincronizar':
           this.router.navigateByUrl('sincronizar');
-          console.log('Navegando a: main/sincronizar');
+          // console.log('Navegando a: main/sincronizar');
           break;
 
         case 'recoleccion':
           this.router.navigateByUrl('main/recoleccion');
-          console.log('Navegando a: main/recoleccion');
+          // console.log('Navegando a: main/recoleccion');
           break;
 
         default:

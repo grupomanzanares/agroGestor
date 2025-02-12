@@ -50,7 +50,7 @@ export class SincronizarPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.programaciones)
+    // console.log(this.programaciones)
   }
 
   async cargar() {

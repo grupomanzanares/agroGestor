@@ -187,9 +187,9 @@ export class FincaService {
               ]
             }]
           });
-          console.log(`Finca con id ${datos.id} creado exitosamente`, datos)
+          // console.log(`Finca con id ${datos.id} creado exitosamente`, datos)
         } else {
-          console.log(`Finca con id ${datos.id} ya existe, omitiendo la inserción.`);
+          // console.log(`Finca con id ${datos.id} ya existe, omitiendo la inserción.`);
         }
       }
     } catch (error) {

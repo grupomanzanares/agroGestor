@@ -42,23 +42,6 @@ export class UsersService {
     )
   }
 
-  // desencriptar(encryptedText: string): string {
-  //   try {
-  //     const secretKey = environment.secretKey; // Clave compartida con la API
-  //     const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
-  //     const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
-
-  //     if (!decryptedText) {
-  //       console.warn('No se pudo desencriptar el texto.');
-  //       return encryptedText; // Retorna el texto original si no se puede desencriptar
-  //     }
-
-  //     return decryptedText;
-  //   } catch (error) {
-  //     console.error('Error al desencriptar:', error);
-  //     return encryptedText; // Retorna el texto original en caso de error
-  //   }
-  // }
   desencriptar(encryptedText: string): string {
     try {
       if (!encryptedText) {

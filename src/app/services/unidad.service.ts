@@ -165,9 +165,9 @@ export class UnidadService {
               ]
             }]
           });
-          console.log(`Unidad con id ${datos.id} creado exitosamente: ${datos}`)
+          // console.log(`Unidad con id ${datos.id} creado exitosamente: ${datos}`)
         } else {
-          console.log(`Unidad con id ${datos.id} ya existe, omitiendo la inserción`)
+          // console.log(`Unidad con id ${datos.id} ya existe, omitiendo la inserción`)
         }
       }
     } catch (error) {

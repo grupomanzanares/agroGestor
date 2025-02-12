@@ -170,9 +170,9 @@ export class SubcategoriaService {
               ]
             }]
           });
-          console.log(`Subcategoria con id ${datos.id} creado exitosamente: ${datos}`)
+          // console.log(`Subcategoria con id ${datos.id} creado exitosamente: ${datos}`)
         } else {
-          console.log(`Subcategoria con id ${datos.id} ya existe, omitiendo la inserción`)
+          // console.log(`Subcategoria con id ${datos.id} ya existe, omitiendo la inserción`)
         }
       }
     } catch (error) {

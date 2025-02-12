@@ -58,7 +58,7 @@ export class ProgramacionPage implements OnInit {
   }
 
   async onShowForm(programacion: Programacion) {
-    console.log('Programación seleccionada:', programacion);
+    // console.log('Programación seleccionada:', programacion);
 
     if (programacion.sincronizado === 1) {
       this.toastService.presentToast('No puedes abrir la programacion si ya fue sincronizada', 'danger', top)
@@ -112,7 +112,7 @@ export class ProgramacionPage implements OnInit {
   async getEstado() {
     try {
       this.estados = await this.estadoService.obtenerLocal('estado');
-      console.log('Estados cargados:', this.estados);
+      // console.log('Estados cargados:', this.estados);
     } catch (error) {
       console.error('Error al cargar los estados:', error);
     }
@@ -129,7 +129,7 @@ export class ProgramacionPage implements OnInit {
   async getLotes() {
     try {
       this.lotes = await this.lotesService.obtenerDtLocal('fincalotes') || []
-      console.log('Lotes cargados:', this.lotes)
+      // console.log('Lotes cargados:', this.lotes)
     } catch (error) {
       console.error('Error al cargar los lotes')
       this.lotes = []

@@ -64,7 +64,7 @@ export class CategoriaService {
         const { vpsDatos, localDatos } = result
 
         if (localDatos.length === 0) {
-          console.log('No hay datos locales, todos los datos del VPS seran creados')
+          // console.log('No hay datos locales, todos los datos del VPS seran creados')
           return { update: [], create: vpsDatos }
         }
 
@@ -90,7 +90,7 @@ export class CategoriaService {
   }
 
   async update(datosDiferentes: Categoria[], tabla: string) {
-    console.log(`Datos diferentes recibidos para actualizar: ${datosDiferentes}`)
+    // console.log(`Datos diferentes recibidos para actualizar: ${datosDiferentes}`)
     if (datosDiferentes.length === 0) {
       console.log(`No hay datos diferentes para actualizar`)
       return
@@ -131,9 +131,9 @@ export class CategoriaService {
           ]
         });
         if (cambios.length > 0) {
-          console.log(`Categoria con id ${datos.id} actualizado con exito, ${cambios.join(', ')}`)
+          // console.log(`Categoria con id ${datos.id} actualizado con exito, ${cambios.join(', ')}`)
         } else {
-          console.log(`Categoria con id ${datos.id} no requiere de actualizacion`)
+          // console.log(`Categoria con id ${datos.id} no requiere de actualizacion`)
         }
       }
     } catch (error) {
@@ -170,9 +170,9 @@ export class CategoriaService {
               ]
             }]
           });
-          console.log(`Categoria con id ${datos.id} creado exitosamente: ${datos}`)
+          // console.log(`Categoria con id ${datos.id} creado exitosamente: ${datos}`)
         } else {
-          console.log(`Categoria con id ${datos.id} ya existe, omitiendo la inserción`)
+          // console.log(`Categoria con id ${datos.id} ya existe, omitiendo la inserción`)
         }
       }
     } catch (error) {
@@ -186,14 +186,14 @@ export class CategoriaService {
 
       if (update.length > 0) {
         await this.update(update, tabla)
-        console.log(`Categoria actualizada con exito`)
+        // console.log(`Categoria actualizada con exito`)
       } else {
-        console.log(`No hay datos que actualizar`)
+        // console.log(`No hay datos que actualizar`)
       }
 
       if (create.length > 0) {
         await this.create(create, tabla)
-        console.log('Datos de Categoria insertados correctamente')
+        // console.log('Datos de Categoria insertados correctamente')
       }
 
       if (update.length === 0 && create.length === 0) {

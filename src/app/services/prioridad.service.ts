@@ -165,9 +165,9 @@ export class PrioridadService {
               ]
             }]
           })
-          console.log(`Prioridad con id ${datos.id} creado exitosamente: ${datos}`)
+          // console.log(`Prioridad con id ${datos.id} creado exitosamente: ${datos}`)
         } else {
-          console.log(`Prioridad con id ${datos.id} ya existe, omitiendo la insercion`)
+          // console.log(`Prioridad con id ${datos.id} ya existe, omitiendo la insercion`)
         }
       }
     } catch (error) {

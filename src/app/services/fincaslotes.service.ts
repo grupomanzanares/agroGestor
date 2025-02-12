@@ -46,7 +46,7 @@ export class FincaslotesService {
           finca: row.finca
         }));
         return datos
-      }else{
+      } else {
         throw new Error("No se encontraron datos en la basae de datos")
       }
     } catch (error) {
@@ -55,7 +55,7 @@ export class FincaslotesService {
     }
   }
 
-  comparacion(endPoint: string, tabla: string): Observable<{ update: FincaLotes[], create: FincaLotes[] }>{
+  comparacion(endPoint: string, tabla: string): Observable<{ update: FincaLotes[], create: FincaLotes[] }> {
     return forkJoin({
       vpsDatos: this.obtenerVps(endPoint),
       localDatos: from(this.obtenerDtLocal(tabla))
@@ -72,7 +72,7 @@ export class FincaslotesService {
           const localDato = localDatos.find(localDato => localDato.lote === vpsDato.lote)
           if (!localDato) return false
 
-          return(
+          return (
             vpsDato.lote !== localDato.lote ||
             vpsDato.ccosto !== localDato.ccosto ||
             vpsDato.nombre !== localDato.nombre ||
@@ -96,7 +96,7 @@ export class FincaslotesService {
     );
   }
 
-  async update(datosDiferentes: FincaLotes[], tabla: string){
+  async update(datosDiferentes: FincaLotes[], tabla: string) {
     console.log('Datos diiferentes recibidos: ', datosDiferentes)
     if (datosDiferentes.length === 0) {
       console.log('No hay datos diferentes para actualizar')
@@ -111,18 +111,18 @@ export class FincaslotesService {
       for (const datos of datosDiferentes) {
         let cambios = []
 
-        if(datos.ccosto !== undefined) cambios.push('ccosto');
-        if(datos.nombre !== undefined) cambios.push('nombre');
-        if(datos.descripcion !== undefined) cambios.push('descripcion');
-        if(datos.area !== undefined) cambios.push('area');
-        if(datos.plantas !== undefined) cambios.push('plantas');
-        if(datos.imagen !== undefined) cambios.push('imagen');
-        if(datos.habilitado !== undefined) cambios.push('habilitado');
-        if(datos.usuario !== undefined) cambios.push('usuario');
-        if(datos.usuarioMod !== undefined) cambios.push('usuarioMod');
-        if(datos.createdAt !== undefined) cambios.push('createdAt');
-        if(datos.updatedAt !== undefined) cambios.push('updatedAt');
-        if(datos.finca !== undefined) cambios.push('finca');
+        if (datos.ccosto !== undefined) cambios.push('ccosto');
+        if (datos.nombre !== undefined) cambios.push('nombre');
+        if (datos.descripcion !== undefined) cambios.push('descripcion');
+        if (datos.area !== undefined) cambios.push('area');
+        if (datos.plantas !== undefined) cambios.push('plantas');
+        if (datos.imagen !== undefined) cambios.push('imagen');
+        if (datos.habilitado !== undefined) cambios.push('habilitado');
+        if (datos.usuario !== undefined) cambios.push('usuario');
+        if (datos.usuarioMod !== undefined) cambios.push('usuarioMod');
+        if (datos.createdAt !== undefined) cambios.push('createdAt');
+        if (datos.updatedAt !== undefined) cambios.push('updatedAt');
+        if (datos.finca !== undefined) cambios.push('finca');
 
         await CapacitorSQLite.executeSet({
           database: db,
@@ -148,7 +148,7 @@ export class FincaslotesService {
 
         if (cambios.length > 0) {
           console.log(`Lote con id ${datos.lote} actualizado con exito, ${cambios.join(', ')}.`);
-        }else{
+        } else {
           console.log(`Lote con id ${datos.lote} no requiere de actualizacion.`);
         }
       }
@@ -157,7 +157,7 @@ export class FincaslotesService {
     }
   }
 
-  async create(datosParaCrear: FincaLotes[], tabla: string){
+  async create(datosParaCrear: FincaLotes[], tabla: string) {
     const db = await this.sqliteManagerService.getDbName();
     const sql = `INSERT INTO ${tabla} (lote, ccosto, nombre, descripcion, area, plantas, imagen, habilitado, usuario, usuarioMod, createdAt, updatedAt, finca) VALUES  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
@@ -166,17 +166,17 @@ export class FincaslotesService {
         const exsDatos = await CapacitorSQLite.query({
           database: db,
           statement: `SELECT lote FROM ${tabla} WHERE finca = ? AND lote = ?`,
-          values: [datos.finca, datos.lote ]
+          values: [datos.finca, datos.lote]
         });
 
-        if(exsDatos.values.length === 0){
+        if (exsDatos.values.length === 0) {
           await CapacitorSQLite.executeSet({
             database: db,
-            set:[{
+            set: [{
               statement: sql,
-              values:[
+              values: [
                 datos.lote,
-                datos.ccosto, 
+                datos.ccosto,
                 datos.nombre,
                 datos.descripcion,
                 datos.area,
@@ -191,9 +191,9 @@ export class FincaslotesService {
               ]
             }]
           });
-          console.log(`Lote con id ${datos.lote} creado exitosamente `, datos)
+          // console.log(`Lote con id ${datos.lote} creado exitosamente `, datos)
         } else {
-          console.log(`Lote con id ${datos.lote} ya existe, omitiendo la inserción.`);
+          // console.log(`Lote con id ${datos.lote} ya existe, omitiendo la inserción.`);
         }
       }
     } catch (error) {
@@ -201,18 +201,18 @@ export class FincaslotesService {
     }
   }
 
-  async sincronizarLote(endPoint: string, tabla: string){
+  async sincronizarLote(endPoint: string, tabla: string) {
     try {
       const { update, create } = await lastValueFrom(this.comparacion(endPoint, tabla));
 
-      if(update.length > 0){
+      if (update.length > 0) {
         await this.update(update, tabla)
         console.log('Lote actualizado correctamente')
-      }else{
+      } else {
         console.log('No hay datos que actualizar')
       }
 
-      if(create.length > 0){
+      if (create.length > 0) {
         await this.create(create, tabla);
         console.log('Datos de lote insertados correctamente')
       }

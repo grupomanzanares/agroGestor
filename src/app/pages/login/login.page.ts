@@ -43,7 +43,6 @@ export class LoginPage implements OnInit {
   async login() {
     // Verifica el estado de la conexión
     const estado = await Network.getStatus();
-    console.log('Estado de la conexión:', estado);
 
     // Valida el formulario antes de continuar
     if (this.loginFrom.invalid) {
@@ -63,7 +62,7 @@ export class LoginPage implements OnInit {
         await this.offline(nit, password);
       }
     } catch (error) {
-      console.error('Error en el proceso de login:', error);
+      // console.error('Error en el proceso de login:', error);
       this.toastService.presentToast('Ocurrió un error inesperado. Por favor intenta nuevamente.', 'danger', 'top'
       );
     }

@@ -165,9 +165,9 @@ export class EstadoService {
               ]
             }]
           })
-          console.log(`Estado con id ${datos.id} creado exitosamente: ${datos}`)
+          // console.log(`Estado con id ${datos.id} creado exitosamente: ${datos}`)
         } else {
-          console.log(`Estado con id ${datos.id} ya existe, omitiendo la insercion`)
+          // console.log(`Estado con id ${datos.id} ya existe, omitiendo la insercion`)
         }
       }
     } catch (error) {
