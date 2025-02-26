@@ -5,11 +5,13 @@ import { CategoriaService } from 'src/app/services/categoria.service';
 import { EstadoService } from 'src/app/services/estado.service';
 import { FincaService } from 'src/app/services/finca.service';
 import { FincaslotesService } from 'src/app/services/fincaslotes.service';
+import { IdentificacionService } from 'src/app/services/identificacion.service';
 import { PrioridadService } from 'src/app/services/prioridad.service';
 import { ProgramacionService } from 'src/app/services/programacion.service';
 import { SubcategoriaService } from 'src/app/services/subcategoria.service';
 import { SucursalService } from 'src/app/services/sucursal.service';
 import { ToastService } from 'src/app/services/toast.service';
+import { TrabajadorService } from 'src/app/services/trabajador.service';
 import { UnidadService } from 'src/app/services/unidad.service';
 import { UploadDataService } from 'src/app/services/upload-data.service';
 import { UsersService } from 'src/app/services/users.service';
@@ -32,6 +34,8 @@ export class SincronizarPage implements OnInit {
   prioridades: { id: number, nombre: string }[] = []
   estados: { id: number, nombre: string }[] = []
   lotes: { lote: string, nombre: string, finca: number, ccosto: string }[] = [];
+  trabajadores: { id: number, nombre: string }[] = []
+  identificaciones: { id: number, nombre: string }[] = []
 
   constructor(
     private fincaService: FincaService,
@@ -46,6 +50,8 @@ export class SincronizarPage implements OnInit {
     private prioridadService: PrioridadService,
     private estadoService: EstadoService,
     private loteService: FincaslotesService,
+    private trabajadorService: TrabajadorService,
+    private identificacionService: IdentificacionService,
     private uploadDataService: UploadDataService
   ) { }
 
@@ -66,6 +72,8 @@ export class SincronizarPage implements OnInit {
       const prioridad = await this.prioridadService.obtenerLocal('prioridad')
       const estado = await this.estadoService.obtenerLocal('estado')
       const lote = await this.loteService.obtenerDtLocal('fincalotes');
+      const identificacion = await this.identificacionService.obtenerDtLocal('tp_identificacion');
+      const trabajador = await this.trabajadorService.obtenerLocal('trabajador')
       this.users = (user)
       this.fincas = (finca)
       this.sucursales = (sucursal)
@@ -77,6 +85,8 @@ export class SincronizarPage implements OnInit {
       this.prioridades = (prioridad)
       this.estados = (estado)
       this.lotes = (lote)
+      this.identificaciones = (identificacion)
+      this.trabajadores = (trabajador)
     } catch (error) {
       console.error('Error al cargar los datos locales:', error)
     }
@@ -107,6 +117,8 @@ export class SincronizarPage implements OnInit {
         await this.prioridadService.sincronizar('prioridad', 'prioridad')
         await this.estadoService.sincronizar('estado', 'estado')
         await this.loteService.sincronizarLote('fincalote', 'fincalotes');
+        await this.identificacionService.sincronizar('tiposidentificacion', 'tp_identificacion'),
+        await this.trabajadorService.sincronizar('trabajador', "trabajador")
         await this.cargar();
         console.log('Sincronización completada exitosamente.');
       } else {

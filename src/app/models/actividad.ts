@@ -3,6 +3,7 @@ export class Actividad{
     nombre: string;
     descripcion: string;
     controlPorLote: string;
+    controlPorTrabajador: string
     habilitado: number;
     usuario: string;
     usuarioMod: string;

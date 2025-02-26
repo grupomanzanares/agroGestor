@@ -39,6 +39,7 @@ export class ProgramacionService {
           programacion: row.programacion,
           fecha: row.fecha,
           lote: row.lote,
+          trabajador: row.trabajador,
           jornal: row.jornal,
           cantidad: row.cantidad,
           habilitado: row.habilitado,
@@ -75,6 +76,7 @@ export class ProgramacionService {
         p.programacion,
         DATE(p.fecha) AS fecha, 
         p.lote,
+        p.trabajador,
         p.jornal,
         p.cantidad,
         p.habilitado,
@@ -94,6 +96,7 @@ export class ProgramacionService {
         p.prioridadId,
         a.nombre AS actividadNombre,
         a.controlPorLote AS controlPorLote,
+        a.controlPorTrabajador AS controlPorTrabajador,
         f.nombre AS fincaNombre,
         s.nombre AS sucursalNombre,
         e.nombre AS estadoNombre,
@@ -115,11 +118,14 @@ export class ProgramacionService {
       });
 
       if (response.values && response.values.length > 0) {
+        const mesActual = new Date().getMonth() + 1
+        const anoActual = new Date().getFullYear()
         return response.values.map(row => ({
           id: row.id,
           programacion: row.programacion,
           fecha: row.fecha,
           lote: row.lote,
+          trabajador: row.trabajador,
           jornal: row.jornal,
           cantidad: row.cantidad,
           habilitado: row.habilitado,
@@ -132,18 +138,23 @@ export class ProgramacionService {
           usuarioMod: row.usuarioMod,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
-          actividadId: row.actividadId || null, // Ahora sí tendrá el ID
+          actividadId: row.actividadId || null, 
           fincaId: row.fincaId || null,
           sucursalId: row.sucursalId || null,
           estadoId: row.estadoId || null,
           prioridadId: row.prioridadId || null,
           actividadNombre: row.actividadNombre || 'Sin nombre',
           controlPorLote: row.controlPorLote || 0,
+          controlPorTrabajador: row.controlPorTrabajador || 0,
           fincaNombre: row.fincaNombre || 'Sin nombre',
           sucursalNombre: row.sucursalNombre || 'Sin nombre',
           estadoNombre: row.estadoNombre || 'Sin nombre',
           prioridadNombre: row.prioridadNombre || 'Sin nombre'
-        }));
+        }))
+        .filter(row => {
+          const [year, month] = row.fecha.split('-').map(Number)
+          return year === anoActual && month === mesActual
+        })
       } else {
         console.warn('No se encontraron programaciones en la base de datos.');
         return [];
@@ -240,6 +251,7 @@ export class ProgramacionService {
         if (datos.fecha !== undefined) cambios.push('fecha');
         if (datos.programacion !== undefined) cambios.push('programacion');
         if (datos.lote !== undefined) cambios.push('lote');
+        if (datos.trabajador !== undefined) cambios.push('trabajador');
         if (datos.jornal !== undefined) cambios.push('jornal');
         if (datos.cantidad !== undefined) cambios.push('cantidad');
         if (datos.habilitado !== undefined) cambios.push('habilitado');
@@ -267,6 +279,7 @@ export class ProgramacionService {
                 datos.programacion || null,
                 datos.fecha || null,
                 datos.lote || null,
+                datos.trabajador || null,
                 datos.jornal || null,
                 datos.cantidad || null,
                 datos.habilitado || null,
@@ -303,8 +316,8 @@ export class ProgramacionService {
   async create(datosParaCrear: Programacion[], tabla: string) {
     const db = await this.sqlService.getDbName();
     const sql = `INSERT INTO ${tabla} 
-      (id, programacion, fecha, lote, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, fincaId, actividadId, estadoId, prioridadId) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      (id, programacion, fecha, lote, trabajador, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, fincaId, actividadId, estadoId, prioridadId) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     try {
       for (const datos of datosParaCrear) {
@@ -324,6 +337,7 @@ export class ProgramacionService {
                 datos.programacion,
                 datos.fecha,
                 datos.lote,
+                datos.trabajador,
                 datos.jornal,
                 datos.cantidad,
                 datos.habilitado,
@@ -384,15 +398,15 @@ export class ProgramacionService {
     const sql = `UPDATE ${tabla} SET id = ?, sincronizado = 1 WHERE id = ?`
 
     try {
-    const updates = datos.map(dato => ({
-      statement: sql,
-      values: [dato.nuevoId, dato.idLocal] // Asegúrate de que estos valores estén bien asignados
-    }));
+      const updates = datos.map(dato => ({
+        statement: sql,
+        values: [dato.nuevoId, dato.idLocal] // Asegúrate de que estos valores estén bien asignados
+      }));
 
-    await CapacitorSQLite.executeSet({
-      database: db,
-      set: updates
-    });
+      await CapacitorSQLite.executeSet({
+        database: db,
+        set: updates
+      });
     } catch (error) {
       console.error('Error al actualizar los datos:', error);
       throw error;

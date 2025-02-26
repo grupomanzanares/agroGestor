@@ -165,6 +165,15 @@
             <ion-input type="text" formControlName="lote"></ion-input>
           </ion-item>
 
+          <!-- Select Trabajador -->
+          <ion-item class="ion-margin-top" *ngIf="+selectedProgramacion?.controlPorTrabajador === 1">
+            <ion-select interface="popover" placeholder="Selecciona un trabajador" formControlName="trabajador" interface="popover">
+              <ion-select-option *ngFor="let trabajador of trabajadores" [value]="trabajador.id">
+                {{ trabajador.nombre }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
           <!-- Input cantidad -->
           <ion-item>
             <ion-label position="stacked">Cantidad</ion-label>

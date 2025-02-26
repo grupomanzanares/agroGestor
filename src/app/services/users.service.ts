@@ -6,7 +6,7 @@ import { catchError, forkJoin, from, lastValueFrom, map, Observable, throwError 
 import { Users } from '../models/users';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
 import { Router } from '@angular/router';
-import * as CryptoJS from 'crypto-js';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable({
   providedIn: 'root'
@@ -20,10 +20,11 @@ export class UsersService {
   constructor(private http: HttpClient, private sqlManagerService: SqliteManagerService, private router: Router) { }
 
   obtenerVps(endPoint: string): Observable<Users[]> {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
-    })
+    });
+  
     return this.http.get<Users[]>(`${this.apiUrl}${endPoint}`, { headers }).pipe(
       map((users) => {
         return users.map((user) => {
@@ -31,40 +32,69 @@ export class UsersService {
             console.warn(`El usuario ${user.identificacion} no tiene un password válido.`);
             return user;
           }
-          const decrypted = this.desencriptar(user.password)
-          return { ...user, password: decrypted }
-        })
+  
+          console.log('Contraseña encriptada recibida:', user.password);
+  
+          // Guardamos la contraseña encriptada en el localStorage
+          localStorage.setItem(`user_${user.identificacion}`, JSON.stringify(user));
+  
+          return user;
+        });
       }),
       catchError((error) => {
         console.error('Error al obtener datos del VPS:', error);
         return throwError(() => new Error('Error al obtener datos del VPS.'));
       })
-    )
+    );
   }
 
-  desencriptar(encryptedText: string): string {
-    try {
-      if (!encryptedText) {
-        console.warn('El texto encriptado está vacío o es inválido.');
-        return encryptedText; // Retorna el texto original si está vacío
-      }
+  // obtenerVps(endPoint: string): Observable<Users[]> {
+  //   const token = localStorage.getItem('token')
+  //   const headers = new HttpHeaders({
+  //     Authorization: `Bearer ${token}`
+  //   })
+  //   return this.http.get<Users[]>(`${this.apiUrl}${endPoint}`, { headers }).pipe(
+  //     map((users) => {
+  //       return users.map((user) => {
+  //         if (!user.password) {
+  //           console.warn(`El usuario ${user.identificacion} no tiene un password válido.`);
+  //           return user;
+  //         }
+  //         console.log(user.password)
+  //         const decrypted = this.desencriptar(user.password)
+  //         return { ...user, password: decrypted }
+  //       })
+  //     }),
+  //     catchError((error) => {
+  //       console.error('Error al obtener datos del VPS:', error);
+  //       return throwError(() => new Error('Error al obtener datos del VPS.'));
+  //     })
+  //   )
+  // }
 
-      const secretKey = environment.secretKey; // Clave compartida con la API
-      const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+  // desencriptar(encryptedText: string): string {
+  //   try {
+  //     if (!encryptedText) {
+  //       console.warn('El texto encriptado está vacío o es inválido.');
+  //       return encryptedText; // Retorna el texto original si está vacío
+  //     }
 
-      // Verifica que los datos desencriptados sean válidos
-      const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
-      if (!decryptedText) {
-        console.warn('No se pudo desencriptar el texto. Retornando el dato original.');
-        return encryptedText;
-      }
+  //     const secretKey = environment.secretKey; // Clave compartida con la API
+  //     const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
 
-      return decryptedText;
-    } catch (error) {
-      console.error('Error al desencriptar:', error.message);
-      return encryptedText; // Retorna el texto original en caso de error
-    }
-  } 
+  //     // Verifica que los datos desencriptados sean válidos
+  //     const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+  //     if (!decryptedText) {
+  //       console.warn('No se pudo desencriptar el texto. Retornando el dato original.');
+  //       return encryptedText;
+  //     }
+
+  //     return decryptedText;
+  //   } catch (error) {
+  //     console.error('Error al desencriptar:', error.message);
+  //     return encryptedText; // Retorna el texto original en caso de error
+  //   }
+  // } 
 
   async obtenerDtLocal(tabla: string): Promise<Users[]> {
     const db = await this.sqlManagerService.getDbName()

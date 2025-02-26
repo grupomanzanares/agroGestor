@@ -119,6 +119,7 @@
                 { "column": "nombre", "value":"TEXT NOT NULL" },
                 { "column": "descripcion", "value": "TEXT NULL" },
                 { "column": "controlPorLote", "value":"TEXT NOT NULL" },
+                { "column": "controlPorTrabajador", "value":"TEXT NOT NULL" },
                 { "column": "habilitado", "value":"INTEGER"},
                 { "column": "usuario", "value":"TEXT NULL"},
                 { "column": "usuarioMod", "value":"TEXT NULL"},
@@ -161,6 +162,7 @@
                 { "column": "programacion", "value": "INTEGER NULL" },
                 { "column": "fecha", "value": "TEXT NULL" },
                 { "column": "lote", "value": "TEXT NULL" },
+                { "column": "trabajador", "value": "TEXT NULL" },
                 { "column": "jornal", "value": "INTEGER NULL" },
                 { "column": "cantidad", "value": "INTEGER NULL" },
                 { "column": "habilitado", "value": "INTEGER" },
@@ -197,6 +199,36 @@
                 { "column": "updatedAt", "value": "TEXT NULL" },
                 { "column": "finca", "value": "INTEGER NOT NULL" },
                 { "foreignkey": "finca", "value": "REFERENCES finca(id)" }
+            ]
+        },
+        {
+            "name": "tp_identificacion",
+            "schema": [
+                { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "codigo", "value": "TEXT NULL"},
+                { "column": "nombre", "value": "TEXT NOT NULL"},
+                { "column": "descripcion", "value": "TEXT NULL"},
+                { "column": "habilitado", "value":"INTEGER"},
+                { "column": "usuario", "value":"TEXT NULL"},
+                { "column": "createdAt", "value":"TEXT NULL"},
+                { "column": "updatedAt", "value":"TEXT NULL"},
+                { "column": "usuarioMod", "value":"TEXT NULL"}
+            ]
+        },
+        {
+            "name": "trabajador",
+            "schema": [
+                { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "nit", "value": "INTEGER NULL" },
+                { "column": "nombre", "value":"TEXT NULL" },
+                { "column": "habilitado", "value":"INTEGER NULL" },
+                { "column": "observacion", "value":"TEXT NULL" },
+                { "column": "usuario", "value": "TEXT NULL" },
+                { "column": "usuarioMod", "value": "TEXT NULL" },
+                { "column": "createdAt", "value": "TEXT NULL" },
+                { "column": "updatedAt", "value": "TEXT NULL" },
+                { "column": "tipoIdentificacion", "value" :"INTEGER NOT NULL"},
+                { "foreignkey": "tipoIdentificacion", "value": "REFERENCES tp_identificacion(id)" }
             ]
         }
     ]

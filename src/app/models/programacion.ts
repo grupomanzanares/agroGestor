@@ -3,6 +3,7 @@ export class Programacion{
     programacion: number;
     fecha: string;
     lote: string;
+    trabajador: string
     jornal: number;
     cantidad: number;
     habilitado: number;

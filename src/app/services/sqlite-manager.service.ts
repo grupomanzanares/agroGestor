@@ -154,6 +154,7 @@ export class SqliteManagerService {
           programacion: row.programacion,
           fecha: row.fecha,
           lote: row.lote,
+          trabajador: row.trabajador,
           jornal: row.jornal,
           cantidad: row.cantidad,
           habilitado: row.habilitado,

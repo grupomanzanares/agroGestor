@@ -184,7 +184,7 @@
       <thead>
         <tr>
           <th>Lote</th>
-          <th>ID</th>
+          <th>Nombre</th>
         </tr>
       </thead>
       <tbody>
@@ -194,6 +194,38 @@
         </tr>
       </tbody>
     </table> 
+
+    <h3>Trabajadores</h3>
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of trabajadores">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table>  
+
+    <h3>Identificaciones</h3>
+    <table class="sync-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let datos of identificaciones">
+          <td>{{ datos.id }}</td>
+          <td>{{ datos.nombre }}</td>
+        </tr>
+      </tbody>
+    </table>  
 
   </div>
 </ion-content>

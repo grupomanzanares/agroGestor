@@ -9,6 +9,7 @@ import { PrioridadService } from 'src/app/services/prioridad.service';
 import { ProgramacionService } from 'src/app/services/programacion.service';
 import { SqliteManagerService } from 'src/app/services/sqlite-manager.service';
 import { ToastService } from 'src/app/services/toast.service';
+import { TrabajadorService } from 'src/app/services/trabajador.service';
 
 @Component({
   selector: 'app-programacion',
@@ -29,7 +30,8 @@ export class ProgramacionPage implements OnInit {
   filterPriori: string = null;
   selectedProgramacion: any = null;
   lotes: any[] = []
-  lotesDisponibles: any[] = [];
+  trabajadores: any[] = []
+
 
   public inputs = new FormGroup<{ [key: string]: AbstractControl<any, any> }>({
     actividad: new FormControl({ value: '', disabled: true }),
@@ -45,7 +47,8 @@ export class ProgramacionPage implements OnInit {
     private prioridadService: PrioridadService,
     private estadoService: EstadoService,
     private toastService: ToastService,
-    private lotesService: FincaslotesService
+    private lotesService: FincaslotesService,
+    private trabajadoresService: TrabajadorService
   ) {
     this.seguimiento = false
   }
@@ -55,6 +58,7 @@ export class ProgramacionPage implements OnInit {
     this.getPrioridad();
     this.getEstado()
     this.getLotes()
+    this.getTrabajadores()
   }
 
   async onShowForm(programacion: Programacion) {
@@ -74,6 +78,8 @@ export class ProgramacionPage implements OnInit {
       estadoId
     };
 
+    console.log(this.selectedProgramacion)
+
     this.seguimiento = true; // Mostrar el formulario
 
     // Inicializar los valores del formulario
@@ -88,6 +94,12 @@ export class ProgramacionPage implements OnInit {
       this.inputs.addControl('lote', new FormControl('', Validators.required));
     } else {
       this.inputs.removeControl('lote');
+    }
+
+    if (Number(this.selectedProgramacion.controlPorTrabajador) === 1 ) {
+      this.inputs.addControl('trabajador', new FormControl('', Validators.required));
+    } else {
+      this.inputs.removeControl('trabajador')
     }
   }
 
@@ -133,6 +145,16 @@ export class ProgramacionPage implements OnInit {
     } catch (error) {
       console.error('Error al cargar los lotes')
       this.lotes = []
+    }
+  }
+
+  async getTrabajadores(){
+    try {
+      this.trabajadores = await this.trabajadoresService.obtenerLocal('trabajador')
+      console.log(this.trabajadores)
+    } catch (error) {
+      console.error('Error al cargar los trabajadores')
+      this.trabajadores = []
     }
   }
 
@@ -241,15 +263,16 @@ export class ProgramacionPage implements OnInit {
       programacion: baseProgramacion.id,
       fecha: this.inputs.get('fecha')?.value || new Date().toISOString(), // Tomar del formulario o fecha actual
       lote: this.inputs.get('lote')?.value || "",
+      trabajador: this.inputs.get('trabajador')?.value || "",
       jornal: this.inputs.get('jornal')?.value || baseProgramacion.jornal,
       cantidad: this.inputs.get('cantidad')?.value || baseProgramacion.cantidad,
       habilitado: 1, // Activado por defecto
-      sincronizado: 0, 
+      sincronizado: 0,
       fecSincronizacion: new Date().toISOString(), // Fecha de sincronización vacía
       observacion: this.inputs.get('observaciones')?.value || baseProgramacion.observacion,
       signo: -1,
       maquina: '',
-      usuario: localStorage.getItem('userName'), // Cambiar según lógica de autenticación
+      usuario: baseProgramacion.usuario, // Cambiar según lógica de autenticación
       usuarioMod: localStorage.getItem('userName'),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -261,23 +284,38 @@ export class ProgramacionPage implements OnInit {
     };
 
     try {
-      // Actualizar la programación original si corresponde
+      const actualizaciones: Programacion[] = [];
+  
+      // Si ya se completó la programación original, actualizar TODAS las programaciones relacionadas
       if (nuevoEstadoId === 3) {
-        const updateOriginal = {
+        registrosRelacionados.forEach(prog => {
+          actualizaciones.push({
+            ...prog,
+            estadoId: 3,
+            updatedAt: new Date().toISOString(),
+            usuarioMod: localStorage.getItem('userName')
+          });
+        });
+  
+        // También actualizar la programación original
+        actualizaciones.push({
           ...baseProgramacion,
-          estadoId: 3, // Terminado
+          estadoId: 3,
           updatedAt: new Date().toISOString(),
           usuarioMod: localStorage.getItem('userName')
-        };
-        await this.programacionService.updateEst([updateOriginal], 'programacion');
+        });
+  
+        // Guardar los cambios
+        await this.programacionService.updateEst(actualizaciones, 'programacion');
       }
-
+  
       // Insertar la nueva programación en la base de datos
       await this.programacionService.create([nuevaProgramacion], 'programacion');
+  
       this.toastService.presentToast('Registro realizado', 'success', 'top');
       this.getprogramacion(); // Actualizar la lista de programaciones
       this.inputs.reset();
-      this.onCloseForm(); // Cerrar el formulario
+      this.onCloseForm();
     } catch (error) {
       console.error('Error al crear nueva programación:', error);
       this.toastService.presentToast('Error al crear nueva programación', 'danger', 'top');

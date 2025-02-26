@@ -34,6 +34,7 @@
     "@capacitor/status-bar": "6.0.2",
     "@ionic/angular": "^8.4.1",
     "agroGestor": "file:",
+    "bcryptjs": "^3.0.2",
     "crypto-js": "^4.2.0",
     "ionicons": "^7.0.0",
     "jeep-sqlite": "^2.8.0",
