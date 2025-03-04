@@ -225,4 +225,22 @@ export class FincaslotesService {
     }
   }
 
+  async getLotes(finca: number): Promise<any[]> {
+    try {
+      const db = await this.sqliteManagerService.getDbName();
+      const sql = `SELECT lote, descripcion FROM fincalotes WHERE finca = ?`;
+  
+      const result = await CapacitorSQLite.query({
+        database: db,
+        statement: sql,
+        values: [finca] 
+      });
+  
+      return result.values.length > 0 ? result.values : [];
+    } catch (error) {
+      console.error('Error al obtener los lotes:', error);
+      return [];
+    }
+  }
+
 }

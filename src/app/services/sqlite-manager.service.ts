@@ -168,6 +168,7 @@ export class SqliteManagerService {
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
           sucursalId: row.sucursalId,
+          responsableId: row.responsableId,
           fincaId: row.fincaId,
           actividadId: row.actividadId,
           estadoId: row.estadoId,

@@ -17,6 +17,7 @@ export class Programacion{
     createdAt: string;
     updatedAt: string;
     sucursalId: number;
+    responsableId: number;
     fincaId: number;
     actividadId: number;
     estadoId: number;
@@ -24,6 +25,7 @@ export class Programacion{
     actividadNombre?: string
     fincaNombre?: string;
     sucursalNombre?: string;
+    responsableNombre?: string;
     estadoNombre?: string;
     prioridadNombre?: string;
 }

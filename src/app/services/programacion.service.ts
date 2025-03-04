@@ -53,6 +53,7 @@ export class ProgramacionService {
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
           sucursalId: row.sucursalId,
+          responsableId: row.responsableId,
           fincaId: row.fincaId,
           actividadId: row.actividadId,
           estadoId: row.estadoId,
@@ -69,8 +70,13 @@ export class ProgramacionService {
     }
   }
 
-  async getProgramacionConNombres(tabla: string): Promise<any[]> {
-    const sql = `
+  async getProgramaciones(
+    tabla: string,
+    usuario: string | null = null,
+    programacionId: number | null = null,
+    signo: number | null = null
+  ): Promise<any[]> {
+    let sql = `
       SELECT 
         p.id,
         p.programacion,
@@ -92,6 +98,7 @@ export class ProgramacionService {
         p.actividadId,
         p.fincaId,
         p.sucursalId,
+        p.responsableId,
         p.estadoId,
         p.prioridadId,
         a.nombre AS actividadNombre,
@@ -99,6 +106,7 @@ export class ProgramacionService {
         a.controlPorTrabajador AS controlPorTrabajador,
         f.nombre AS fincaNombre,
         s.nombre AS sucursalNombre,
+        u.name AS responsableNombre,
         e.nombre AS estadoNombre,
         pr.nombre AS prioridadNombre
       FROM 
@@ -106,20 +114,41 @@ export class ProgramacionService {
       LEFT JOIN actividad a ON p.actividadId = a.id
       LEFT JOIN finca f ON p.fincaId = f.id
       LEFT JOIN sucursal s ON p.sucursalId = s.id
+      LEFT JOIN users u ON p.responsableId = u.id
       LEFT JOIN estado e ON p.estadoId = e.id
-      LEFT JOIN prioridad pr ON p.prioridadId = pr.id`;
+      LEFT JOIN prioridad pr ON p.prioridadId = pr.id
+      WHERE 1=1`;  // 🔹 Evita errores en SQL y permite agregar condiciones dinámicamente
+  
+    // 🔹 Agregar filtros opcionales dinámicamente
+    const values: any[] = [];
+  
+    if (signo !== null) {
+      sql += ` AND p.signo = ?`;
+      values.push(signo);
+    }
+  
+    if (usuario !== null) {
+      sql += ` AND u.name = ?`;
+      values.push(usuario);
+    }
+  
+    if (programacionId !== null) {
+      sql += ` AND p.programacion = ?`;
+      values.push(programacionId);
+    }
+  
     const db = await this.sqlService.getDbName();
-
+  
     try {
       const response = await CapacitorSQLite.query({
         database: db,
         statement: sql,
-        values: []
+        values: values
       });
-
+  
       if (response.values && response.values.length > 0) {
-        const mesActual = new Date().getMonth() + 1
-        const anoActual = new Date().getFullYear()
+        const mesActual = new Date().getMonth() + 1;
+        const anoActual = new Date().getFullYear();
         return response.values.map(row => ({
           id: row.id,
           programacion: row.programacion,
@@ -138,9 +167,10 @@ export class ProgramacionService {
           usuarioMod: row.usuarioMod,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
-          actividadId: row.actividadId || null, 
+          actividadId: row.actividadId || null,
           fincaId: row.fincaId || null,
           sucursalId: row.sucursalId || null,
+          responsableId: row.responsableId || null,
           estadoId: row.estadoId || null,
           prioridadId: row.prioridadId || null,
           actividadNombre: row.actividadNombre || 'Sin nombre',
@@ -148,19 +178,19 @@ export class ProgramacionService {
           controlPorTrabajador: row.controlPorTrabajador || 0,
           fincaNombre: row.fincaNombre || 'Sin nombre',
           sucursalNombre: row.sucursalNombre || 'Sin nombre',
+          responsableNombre: row.responsableNombre || 'Sin nombre',
           estadoNombre: row.estadoNombre || 'Sin nombre',
           prioridadNombre: row.prioridadNombre || 'Sin nombre'
-        }))
-        .filter(row => {
-          const [year, month] = row.fecha.split('-').map(Number)
-          return year === anoActual && month === mesActual
-        })
+        })).filter(row => {
+          const [year, month] = row.fecha.split('-').map(Number);
+          return year === anoActual && month === mesActual;
+        });
       } else {
         console.warn('No se encontraron programaciones en la base de datos.');
         return [];
       }
     } catch (error) {
-      console.error('Error al obtener programaciones con nombres desde SQLite:', error);
+      console.error('Error al obtener programaciones:', error);
       throw error;
     }
   }
@@ -264,7 +294,8 @@ export class ProgramacionService {
         if (datos.usuarioMod !== undefined) cambios.push('usuarioMod');
         if (datos.createdAt !== undefined) cambios.push('createdAt');
         if (datos.updatedAt !== undefined) cambios.push('updatedAt');
-        if (datos.sucursalId !== undefined) cambios.push('sucursalId')
+        if (datos.sucursalId !== undefined) cambios.push('sucursalId');
+        if (datos.responsableId !== undefined) cambios.push('responsableId')
         if (datos.fincaId !== undefined) cambios.push('fincaId');
         if (datos.actividadId !== undefined) cambios.push('actividadId');
         if (datos.estadoId !== undefined) cambios.push('estadoId');
@@ -293,6 +324,7 @@ export class ProgramacionService {
                 datos.createdAt || null,
                 datos.updatedAt || null,
                 datos.sucursalId || null,
+                datos.responsableId || null,
                 datos.fincaId || null,
                 datos.actividadId || null,
                 datos.estadoId || null,
@@ -316,8 +348,8 @@ export class ProgramacionService {
   async create(datosParaCrear: Programacion[], tabla: string) {
     const db = await this.sqlService.getDbName();
     const sql = `INSERT INTO ${tabla} 
-      (id, programacion, fecha, lote, trabajador, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, fincaId, actividadId, estadoId, prioridadId) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      (id, programacion, fecha, lote, trabajador, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, responsableId, fincaId, actividadId, estadoId, prioridadId) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     try {
       for (const datos of datosParaCrear) {
@@ -351,6 +383,7 @@ export class ProgramacionService {
                 datos.createdAt,
                 datos.updatedAt,
                 datos.sucursalId,
+                datos.responsableId,
                 datos.fincaId,
                 datos.actividadId,
                 datos.estadoId,

@@ -7,7 +7,6 @@ import { EstadoService } from 'src/app/services/estado.service';
 import { FincaslotesService } from 'src/app/services/fincaslotes.service';
 import { PrioridadService } from 'src/app/services/prioridad.service';
 import { ProgramacionService } from 'src/app/services/programacion.service';
-import { SqliteManagerService } from 'src/app/services/sqlite-manager.service';
 import { ToastService } from 'src/app/services/toast.service';
 import { TrabajadorService } from 'src/app/services/trabajador.service';
 
@@ -31,6 +30,12 @@ export class ProgramacionPage implements OnInit {
   selectedProgramacion: any = null;
   lotes: any[] = []
   trabajadores: any[] = []
+  lotesfincas: any[]
+  seleccionarTodos: boolean = false;
+  form: FormGroup;
+  seguimientos: Programacion[] = []
+  filterSeguimiento: Programacion[] = []
+  usuarioLogeo = localStorage.getItem('userName')
 
 
   public inputs = new FormGroup<{ [key: string]: AbstractControl<any, any> }>({
@@ -48,7 +53,7 @@ export class ProgramacionPage implements OnInit {
     private estadoService: EstadoService,
     private toastService: ToastService,
     private lotesService: FincaslotesService,
-    private trabajadoresService: TrabajadorService
+    private trabajadoresService: TrabajadorService,
   ) {
     this.seguimiento = false
   }
@@ -59,6 +64,11 @@ export class ProgramacionPage implements OnInit {
     this.getEstado()
     this.getLotes()
     this.getTrabajadores()
+    this.form = new FormGroup({
+      seleccionarTodos: new FormControl(false)
+    });
+    this.getProgramacionUsuario(this.usuarioLogeo)
+
   }
 
   async onShowForm(programacion: Programacion) {
@@ -80,6 +90,9 @@ export class ProgramacionPage implements OnInit {
 
     console.log(this.selectedProgramacion)
 
+    await this.lotesFincas()
+    await this.getSeguimiento()
+
     this.seguimiento = true; // Mostrar el formulario
 
     // Inicializar los valores del formulario
@@ -91,16 +104,93 @@ export class ProgramacionPage implements OnInit {
     });
 
     if (Number(this.selectedProgramacion.controlPorLote) === 1) {
-      this.inputs.addControl('lote', new FormControl('', Validators.required));
+      this.inputs.addControl('lote', new FormControl({ value: '', disabled: true }));
     } else {
       this.inputs.removeControl('lote');
     }
 
-    if (Number(this.selectedProgramacion.controlPorTrabajador) === 1 ) {
+    if (Number(this.selectedProgramacion.controlPorTrabajador) === 1) {
       this.inputs.addControl('trabajador', new FormControl('', Validators.required));
     } else {
       this.inputs.removeControl('trabajador')
     }
+  }
+
+  async lotesFincas() {
+    if (!this.selectedProgramacion) {
+      console.error('No hay programación seleccionada');
+      return;
+    }
+
+    try {
+      this.lotesfincas = await this.lotesService.getLotes(this.selectedProgramacion.fincaId);
+      console.log('Lotes cargados:', this.lotesfincas);
+
+      // Limpiar los controles existentes antes de agregar nuevos
+      Object.keys(this.form.controls).forEach((key) => {
+        if (key.startsWith('lote_')) {
+          this.form.removeControl(key);
+        }
+      });
+
+      // Asegurar que 'lote' se crea correctamente en el formulario
+      if (!this.form.get('lote')) {
+        this.form.addControl('lote', new FormControl(''));
+      }
+
+      // Agregar controles dinámicos para los lotes usando "lote" como identificador
+      this.lotesfincas.forEach(lote => {
+        this.form.addControl(`lote_${lote.lote}`, new FormControl(false));
+      });
+
+    } catch (error) {
+      console.error('Error al obtener lotes:', error);
+      this.lotesfincas = [];
+    }
+  }
+
+  toggleTodos() {
+    const seleccionarTodos = this.form.get('seleccionarTodos').value;
+
+    let seleccionados = [];
+
+    this.lotesfincas.forEach(lote => {
+      const control = this.form.get(`lote_${lote.lote}`);
+      if (control) {
+        control.setValue(seleccionarTodos, { emitEvent: false });
+        if (seleccionarTodos) {
+          seleccionados.push(lote.lote);
+        }
+      }
+    });
+
+    // Si "Todos" está seleccionado, mostrar "Todos" en el input, de lo contrario, mostrar los lotes seleccionados
+    this.form.get('lote').setValue(seleccionarTodos ? 'Todos' : seleccionados.join(', '));
+
+    console.log("Estado de 'Todos':", seleccionarTodos);
+    console.log("Lotes seleccionados:", this.form.get('lote').value);
+  }
+
+  onCheckboxChange(lote: string) {
+    const isChecked = this.form.get(`lote_${lote}`).value;
+
+    // Obtener la lista actual de lotes seleccionados
+    let seleccionados = this.form.get('lote').value ? this.form.get('lote').value.split(', ') : [];
+
+    if (isChecked) {
+      // Si se selecciona, agregarlo a la lista si no está ya presente
+      if (!seleccionados.includes(lote)) {
+        seleccionados.push(lote);
+      }
+    } else {
+      // Si se deselecciona, eliminarlo de la lista
+      seleccionados = seleccionados.filter(l => l !== lote);
+    }
+
+    // Actualizar el input con la lista de lotes seleccionados
+    this.form.get('lote').setValue(seleccionados.join(', '));
+
+    console.log("Lotes seleccionados:", this.form.get('lote').value);
   }
 
   onCloseForm() {
@@ -114,10 +204,27 @@ export class ProgramacionPage implements OnInit {
 
   async getprogramacion() {
     try {
-      this.programaciones = await this.programacionService.getProgramacionConNombres('programacion');
+      this.programaciones = await this.programacionService.getProgramaciones('programacion', this.usuarioLogeo, null, 1);
       this.filteredProgramaciones = [...this.programaciones];
+      console.log(this.filteredProgramaciones)
     } catch (error) {
       console.error('Error al obtener programaciones:', error);
+    }
+  }
+
+  async getSeguimiento() {
+    try {
+      if (!this.selectedProgramacion) {
+        console.warn("No hay programación seleccionada.");
+        return;
+      }
+
+      this.seguimientos = await this.programacionService.getProgramaciones('programacion', this.usuarioLogeo, this.selectedProgramacion.id, -1);
+      this.filterSeguimiento = [...this.seguimientos];
+
+      console.log("Programaciones en seguimiento:", this.seguimientos);
+    } catch (error) {
+      console.error('Error al obtener programaciones en seguimiento:', error);
     }
   }
 
@@ -148,7 +255,7 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
-  async getTrabajadores(){
+  async getTrabajadores() {
     try {
       this.trabajadores = await this.trabajadoresService.obtenerLocal('trabajador')
       console.log(this.trabajadores)
@@ -181,6 +288,40 @@ export class ProgramacionPage implements OnInit {
 
   getRealizados(): Programacion[] {
     return this.programaciones.filter(p => p.estadoNombre === 'Realizado');
+  }
+
+  getEstadoClass(estado: string): string {
+    switch (estado.toLowerCase()) {
+      case 'pendiente':
+        return 'estado-pendiente';
+      case 'en proceso':
+        return 'estado-en-proceso';
+      case 'realizado':
+        return 'estado-realizado';
+      default:
+        return '';
+    }
+  }
+
+  getPrioridadClass(prioridad: string): string {
+    switch (prioridad.toLowerCase()) {
+      case 'alta':
+        return 'prioridad-alta';
+      case 'media':
+        return 'prioridad-media';
+      case 'baja':
+        return 'prioridad-baja';
+      default:
+        return '';
+    }
+  }
+
+  async getProgramacionUsuario(usuario: string) {
+    try {
+        this.filteredProgramaciones = await this.programacionService.getProgramaciones('programacion', usuario, null, 1);
+    } catch (error) {
+        console.error('Error al obtener programaciones:', error);
+    }
   }
 
   nullestados(programacion: Programacion): Estado[] {
@@ -257,12 +398,14 @@ export class ProgramacionPage implements OnInit {
     const cantidadTotal = sumaCantidadesRelacionadas + (this.inputs.get('cantidad')?.value || 0); // Incluir la cantidad de la nueva programación
     const nuevoEstadoId = cantidadTotal >= baseProgramacion.cantidad ? 3 : 2; // Estado: 3 = Terminado, 2 = En Proceso
 
+    const nuevoLote = this.form.get('lote')?.value || "";
+
     // Crear la nueva programación tomando como base la original
     const nuevaProgramacion: Programacion = {
       id: nuevoId,
       programacion: baseProgramacion.id,
       fecha: this.inputs.get('fecha')?.value || new Date().toISOString(), // Tomar del formulario o fecha actual
-      lote: this.inputs.get('lote')?.value || "",
+      lote: nuevoLote,
       trabajador: this.inputs.get('trabajador')?.value || "",
       jornal: this.inputs.get('jornal')?.value || baseProgramacion.jornal,
       cantidad: this.inputs.get('cantidad')?.value || baseProgramacion.cantidad,
@@ -277,15 +420,18 @@ export class ProgramacionPage implements OnInit {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       sucursalId: baseProgramacion.sucursalId,
+      responsableId: baseProgramacion.responsableId,
       fincaId: baseProgramacion.fincaId,
       actividadId: baseProgramacion.actividadId,
       estadoId: nuevoEstadoId, // Usar el estado calculado
       prioridadId: baseProgramacion.prioridadId
     };
 
+    console.log(nuevaProgramacion)
+
     try {
       const actualizaciones: Programacion[] = [];
-  
+
       // Si ya se completó la programación original, actualizar TODAS las programaciones relacionadas
       if (nuevoEstadoId === 3) {
         registrosRelacionados.forEach(prog => {
@@ -296,7 +442,7 @@ export class ProgramacionPage implements OnInit {
             usuarioMod: localStorage.getItem('userName')
           });
         });
-  
+
         // También actualizar la programación original
         actualizaciones.push({
           ...baseProgramacion,
@@ -304,14 +450,14 @@ export class ProgramacionPage implements OnInit {
           updatedAt: new Date().toISOString(),
           usuarioMod: localStorage.getItem('userName')
         });
-  
+
         // Guardar los cambios
         await this.programacionService.updateEst(actualizaciones, 'programacion');
       }
-  
+
       // Insertar la nueva programación en la base de datos
       await this.programacionService.create([nuevaProgramacion], 'programacion');
-  
+
       this.toastService.presentToast('Registro realizado', 'success', 'top');
       this.getprogramacion(); // Actualizar la lista de programaciones
       this.inputs.reset();

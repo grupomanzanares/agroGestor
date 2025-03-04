@@ -17,17 +17,41 @@
   /* Esquinas redondeadas (opcional) */
 }
 
-/* Colores específicos */
-.pendiente {
-  background-color: #FF2511;
+.status-indicator span,
+.priority-indicator span {
+    display: inline-block;
+    width: 20px;
+    /* Tamaño del cuadro */
+    height: 20px;
+    /* Tamaño del cuadro */
+    border-radius: 3px;
+    /* Opcional: redondea las esquinas */
 }
 
-.en-proceso {
-  background-color: orange;
+/* Colores para estados */
+.estado-pendiente span {
+    background-color: #FF2511;
 }
 
-.realizado {
-  background-color: #18A558;
+.estado-en-proceso span {
+    background-color: orange;
+}
+
+.estado-realizado span {
+    background-color: #18A558;
+}
+
+/* Colores para prioridades */
+.prioridad-alta span {
+    background-color: red;
+}
+
+.prioridad-media span {
+    background-color: yellow;
+}
+
+.prioridad-baja span {
+    background-color: #18A558;
 }
 
 ion-button {

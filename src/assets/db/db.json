@@ -176,6 +176,7 @@
                 { "column": "createdAt", "value": "TEXT NULL" },
                 { "column": "updatedAt", "value": "TEXT NULL" },
                 { "column": "sucursalId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(sucursalId) REFERENCES sucursal(id)" },
+                { "column": "responsableId", "value": "INTEGER NULL", "foreignkey":"FOREIGN KEY(responsableId) REFERENCES users(id)" },
                 { "column": "fincaId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(fincaId) REFERENCES finca(id)" },
                 { "column": "actividadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(actividadId) REFERENCES actividad(id)" },
                 { "column": "estadoId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(estadoId) REFERENCES estado(id)" },

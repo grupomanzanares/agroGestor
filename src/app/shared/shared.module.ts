@@ -4,7 +4,6 @@ import { HeaderComponent } from './components/header/header.component';
 import { CustomInputComponent } from './components/custom-input/custom-input.component';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { SecondaryHeaderComponent } from './components/secondary-header/secondary-header.component';
 
 
 
@@ -12,12 +11,10 @@ import { SecondaryHeaderComponent } from './components/secondary-header/secondar
   declarations: [
     HeaderComponent,
     CustomInputComponent,
-    SecondaryHeaderComponent
   ],
   exports:[
     HeaderComponent,
     CustomInputComponent,
-    SecondaryHeaderComponent,
     ReactiveFormsModule
   ],
   imports: [
