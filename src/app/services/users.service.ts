@@ -6,7 +6,7 @@ import { catchError, forkJoin, from, lastValueFrom, map, Observable, throwError 
 import { Users } from '../models/users';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
 import { Router } from '@angular/router';
-import * as bcrypt from 'bcryptjs';
+// import * as bcrypt from 'bcryptjs';
 
 @Injectable({
   providedIn: 'root'
