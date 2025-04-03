@@ -28,4 +28,5 @@ export class Programacion{
     responsableNombre?: string;
     estadoNombre?: string;
     prioridadNombre?: string;
+    trabajadorNombre?: string
 }

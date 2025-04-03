@@ -70,19 +70,13 @@ export class ProgramacionService {
     }
   }
 
-  async getProgramaciones(
-    tabla: string,
-    usuario: string | null = null,
-    programacionId: number | null = null,
-    signo: number | null = null
-  ): Promise<any[]> {
+  async getProgramaciones(tabla: string, usuario: string | null = null, programacionId: number | null = null, signo: number | null = null ): Promise<any[]> {
     let sql = `
       SELECT 
         p.id,
         p.programacion,
         DATE(p.fecha) AS fecha, 
         p.lote,
-        p.trabajador,
         p.jornal,
         p.cantidad,
         p.habilitado,
@@ -101,6 +95,8 @@ export class ProgramacionService {
         p.responsableId,
         p.estadoId,
         p.prioridadId,
+        p.trabajador ,
+        t.nombre AS trabajadorNombre,
         a.nombre AS actividadNombre,
         a.controlPorLote AS controlPorLote,
         a.controlPorTrabajador AS controlPorTrabajador,
@@ -111,6 +107,7 @@ export class ProgramacionService {
         pr.nombre AS prioridadNombre
       FROM 
         ${tabla} p
+      LEFT JOIN trabajador t ON p.trabajador = t.id
       LEFT JOIN actividad a ON p.actividadId = a.id
       LEFT JOIN finca f ON p.fincaId = f.id
       LEFT JOIN sucursal s ON p.sucursalId = s.id
@@ -173,6 +170,7 @@ export class ProgramacionService {
           responsableId: row.responsableId || null,
           estadoId: row.estadoId || null,
           prioridadId: row.prioridadId || null,
+          trabajadorNombre: row.trabajadorNombre || 'Sin nombre',
           actividadNombre: row.actividadNombre || 'Sin nombre',
           controlPorLote: row.controlPorLote || 0,
           controlPorTrabajador: row.controlPorTrabajador || 0,

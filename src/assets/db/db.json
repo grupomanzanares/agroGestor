@@ -156,34 +156,6 @@
             ]
         },
         {
-            "name": "programacion",
-            "schema": [
-                { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
-                { "column": "programacion", "value": "INTEGER NULL" },
-                { "column": "fecha", "value": "TEXT NULL" },
-                { "column": "lote", "value": "TEXT NULL" },
-                { "column": "trabajador", "value": "TEXT NULL" },
-                { "column": "jornal", "value": "INTEGER NULL" },
-                { "column": "cantidad", "value": "INTEGER NULL" },
-                { "column": "habilitado", "value": "INTEGER" },
-                { "column": "sincronizado", "value": "INTEGER" },
-                { "column": "fecSincronizacion", "value": "TEXT NULL" },
-                { "column": "observacion", "value": "TEXT NULL" },
-                { "column": "signo", "value": "INTEGER NULL" },
-                { "column": "maquina", "value": "TEXT NULL" },
-                { "column": "usuario", "value": "TEXT NULL" },
-                { "column": "usuarioMod", "value": "TEXT NULL" },
-                { "column": "createdAt", "value": "TEXT NULL" },
-                { "column": "updatedAt", "value": "TEXT NULL" },
-                { "column": "sucursalId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(sucursalId) REFERENCES sucursal(id)" },
-                { "column": "responsableId", "value": "INTEGER NULL", "foreignkey":"FOREIGN KEY(responsableId) REFERENCES users(id)" },
-                { "column": "fincaId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(fincaId) REFERENCES finca(id)" },
-                { "column": "actividadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(actividadId) REFERENCES actividad(id)" },
-                { "column": "estadoId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(estadoId) REFERENCES estado(id)" },
-                { "column": "prioridadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(prioridadId) REFERENCES prioridad(id)" }
-            ]
-        },
-        {
             "name": "fincalotes",
             "schema": [
                 { "column": "lote", "value": "TEXT NOT NULL" },
@@ -230,6 +202,34 @@
                 { "column": "updatedAt", "value": "TEXT NULL" },
                 { "column": "tipoIdentificacion", "value" :"INTEGER NOT NULL"},
                 { "foreignkey": "tipoIdentificacion", "value": "REFERENCES tp_identificacion(id)" }
+            ]
+        },
+        {
+            "name": "programacion",
+            "schema": [
+                { "column": "id", "value": "INTEGER NOT NULL PRIMARY KEY" },
+                { "column": "programacion", "value": "INTEGER NULL" },
+                { "column": "fecha", "value": "TEXT NULL" },
+                { "column": "lote", "value": "TEXT NULL" },
+                { "column": "jornal", "value": "INTEGER NULL" },
+                { "column": "cantidad", "value": "INTEGER NULL" },
+                { "column": "habilitado", "value": "INTEGER" },
+                { "column": "sincronizado", "value": "INTEGER" },
+                { "column": "fecSincronizacion", "value": "TEXT NULL" },
+                { "column": "observacion", "value": "TEXT NULL" },
+                { "column": "signo", "value": "INTEGER NULL" },
+                { "column": "maquina", "value": "TEXT NULL" },
+                { "column": "usuario", "value": "TEXT NULL" },
+                { "column": "usuarioMod", "value": "TEXT NULL" },
+                { "column": "createdAt", "value": "TEXT NULL" },
+                { "column": "updatedAt", "value": "TEXT NULL" },
+                { "column": "sucursalId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(sucursalId) REFERENCES sucursal(id)" },
+                { "column": "responsableId", "value": "INTEGER NULL", "foreignkey":"FOREIGN KEY(responsableId) REFERENCES users(id)" },
+                { "column": "fincaId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(fincaId) REFERENCES finca(id)" },
+                { "column": "actividadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(actividadId) REFERENCES actividad(id)" },
+                { "column": "estadoId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(estadoId) REFERENCES estado(id)" },
+                { "column": "prioridadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(prioridadId) REFERENCES prioridad(id)" },
+                { "column": "trabajador", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(trabajador) REFERENCES trabajador(id)" }
             ]
         }
     ]

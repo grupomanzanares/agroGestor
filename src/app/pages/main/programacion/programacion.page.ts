@@ -42,7 +42,7 @@ export class ProgramacionPage implements OnInit {
     actividad: new FormControl({ value: '', disabled: true }),
     estado: new FormControl({ value: '', disabled: true }),
     finca: new FormControl({ value: '', disabled: true }),
-    cantidad: new FormControl(0, [Validators.required]),
+    cantidad: new FormControl(0, [Validators.min(0)]),
     jornal: new FormControl(0, [Validators.required]),
     observaciones: new FormControl('', [Validators.required])
   })
@@ -91,7 +91,7 @@ export class ProgramacionPage implements OnInit {
     console.log(this.selectedProgramacion)
 
     await this.lotesFincas()
-    await this.getSeguimiento()
+    await this.getSeguimiento(programacion.id)
 
     this.seguimiento = true; // Mostrar el formulario
 
@@ -212,17 +212,18 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
-  async getSeguimiento() {
+  async getSeguimiento(id: number) {
     try {
       if (!this.selectedProgramacion) {
         console.warn("No hay programación seleccionada.");
         return;
       }
 
-      this.seguimientos = await this.programacionService.getProgramaciones('programacion', this.usuarioLogeo, this.selectedProgramacion.id, -1);
+      this.seguimientos = await this.programacionService.getProgramaciones('programacion', null, id, -1);
       this.filterSeguimiento = [...this.seguimientos];
 
       console.log("Programaciones en seguimiento:", this.seguimientos);
+      console.log( 'Filtraciones', this.filteredProgramaciones)
     } catch (error) {
       console.error('Error al obtener programaciones en seguimiento:', error);
     }
@@ -386,16 +387,18 @@ export class ProgramacionPage implements OnInit {
     }
 
     // Calcular el nuevo ID basado en el ID original
-    const registrosRelacionados = this.programaciones.filter(prog => Math.floor(prog.id / 1000) === baseProgramacionId);
+    const registrosRelacionados = await this.programacionService.getProgramaciones('programacion', null, baseProgramacionId, -1); // <--- CORREGIDO
     const ultimoRegistro = registrosRelacionados.length > 0 ? Math.max(...registrosRelacionados.map(prog => prog.id)) : baseProgramacionId * 1000;
     const nuevoId = ultimoRegistro + 1; // Generar nuevo ID consecutivo
 
     // Calcular la suma de las cantidades de programaciones relacionadas
-    const sumaCantidadesRelacionadas = registrosRelacionados.reduce(
-      (suma, prog) => suma + prog.cantidad, 0);
+    const nuevaCantidad = this.inputs.get('cantidad')?.value || 0;
 
     // Verificar si la suma de cantidades alcanza o supera la cantidad de la programación original
-    const cantidadTotal = sumaCantidadesRelacionadas + (this.inputs.get('cantidad')?.value || 0); // Incluir la cantidad de la nueva programación
+    const cantidadTotal = registrosRelacionados.reduce(
+      (suma, prog) => suma + prog.cantidad, 0) + nuevaCantidad; // Incluir la cantidad de la nueva programación
+
+      console.log(cantidadTotal)
     const nuevoEstadoId = cantidadTotal >= baseProgramacion.cantidad ? 3 : 2; // Estado: 3 = Terminado, 2 = En Proceso
 
     const nuevoLote = this.form.get('lote')?.value || "";
@@ -408,7 +411,7 @@ export class ProgramacionPage implements OnInit {
       lote: nuevoLote,
       trabajador: this.inputs.get('trabajador')?.value || "",
       jornal: this.inputs.get('jornal')?.value || baseProgramacion.jornal,
-      cantidad: this.inputs.get('cantidad')?.value || baseProgramacion.cantidad,
+      cantidad: this.inputs.get('cantidad')?.value != null ? this.inputs.get('cantidad')?.value : baseProgramacion.cantidad,
       habilitado: 1, // Activado por defecto
       sincronizado: 0,
       fecSincronizacion: new Date().toISOString(), // Fecha de sincronización vacía
@@ -450,13 +453,34 @@ export class ProgramacionPage implements OnInit {
           updatedAt: new Date().toISOString(),
           usuarioMod: localStorage.getItem('userName')
         });
-
         // Guardar los cambios
         await this.programacionService.updateEst(actualizaciones, 'programacion');
       }
 
+      else if (nuevoEstadoId === 2) {
+        registrosRelacionados.forEach(prog => {
+          actualizaciones.push({
+            ...prog,
+            estadoId: 2,
+            updatedAt: new Date().toISOString(),
+            usuarioMod: localStorage.getItem('userName')
+          });
+        });
+
+        // También actualizar la programación original
+        actualizaciones.push({
+          ...baseProgramacion,
+          estadoId: 2,
+          updatedAt: new Date().toISOString(),
+          usuarioMod: localStorage.getItem('userName')
+        });
+        // Guardar los cambios
+        await this.programacionService.updateEst(actualizaciones, 'programacion');
+      }
+      
       // Insertar la nueva programación en la base de datos
       await this.programacionService.create([nuevaProgramacion], 'programacion');
+      console.log([nuevaProgramacion])
 
       this.toastService.presentToast('Registro realizado', 'success', 'top');
       this.getprogramacion(); // Actualizar la lista de programaciones

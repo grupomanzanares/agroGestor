@@ -230,7 +230,7 @@
           <!-- Input cantidad -->
           <ion-item>
             <ion-label position="stacked">Cantidad</ion-label>
-            <ion-input formControlName="cantidad" placeholder="Ingresa la cantidad"></ion-input>
+            <ion-input formControlName="cantidad" type="number" placeholder="Ingresa la cantidad"></ion-input>
             <div class="error" *ngIf="inputs.controls['cantidad']?.errors && inputs.controls['cantidad']?.touched">
               <samp *ngIf="inputs.controls['cantidad']?.errors?.['required']">Este campo es obligatorio</samp>
             </div>
@@ -239,7 +239,7 @@
           <!-- Input jornal -->
           <ion-item>
             <ion-label position="stacked">Jornal</ion-label>
-            <ion-input formControlName="jornal" placeholder="Ingresa el jornal"></ion-input>
+            <ion-input formControlName="jornal" type="number" placeholder="Ingresa el jornal"></ion-input>
             <div class="error" *ngIf="inputs.controls['jornal']?.errors && inputs.controls['jornal']?.touched">
               <span *ngIf="inputs.controls['jornal']?.errors?.['required']">Este campo es obligatorio</span>
             </div>
@@ -322,6 +322,7 @@
             <ion-card-content>
               <strong>Fecha: </strong>{{ item.fecha }}<br>
               <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
+              <strong>Trabajador:</strong> {{ item.trabajadorNombre }}<br>
               <strong>Finca:</strong> {{ item.fincaNombre }}<br>
               <strong>Prioridad:</strong>
               <span class="priority-indicator" [ngClass]="getPrioridadClass(item.prioridadNombre)">
