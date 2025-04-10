@@ -25,7 +25,7 @@ export class TrabajadorService {
 
   async obtenerLocal(tabla: string): Promise<Trabajador[]> {
     const db = await this.sqlManajer.getDbName()
-    const sql = `SELECT * FROM ${tabla}`
+    const sql = `SELECT * FROM ${tabla} WHERE habilitado = 1`
 
     try {
       const result = await CapacitorSQLite.query({
