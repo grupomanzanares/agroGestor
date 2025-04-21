@@ -30,11 +30,14 @@ export class ProgramacionPage implements OnInit {
   selectedProgramacion: any = null;
   lotes: any[] = []
   trabajadores: any[] = []
+  trabajadoresFilter: any[] = []
   lotesfincas: any[]
   seleccionarTodos: boolean = false;
   form: FormGroup;
   seguimientos: Programacion[] = []
   filterSeguimiento: Programacion[] = []
+  searchTrabajador: string = ''
+  trabajadoresSeleccionados: any[] = [];
   usuarioLogeo = localStorage.getItem('userName')
 
 
@@ -110,9 +113,9 @@ export class ProgramacionPage implements OnInit {
     }
 
     if (Number(this.selectedProgramacion.controlPorTrabajador) === 1) {
-      this.inputs.addControl('trabajador', new FormControl('', Validators.required));
+      // No agregamos el formControl aquí, usamos lista externa
     } else {
-      this.inputs.removeControl('trabajador')
+      this.inputs.removeControl('trabajador');
     }
   }
 
@@ -196,6 +199,7 @@ export class ProgramacionPage implements OnInit {
   onCloseForm() {
     this.seguimiento = false; // Ocultar el formulario
     this.selectedProgramacion = null
+    this.trabajadoresSeleccionados = []
   }
 
   toggleFilters() {
@@ -223,11 +227,18 @@ export class ProgramacionPage implements OnInit {
       this.filterSeguimiento = [...this.seguimientos];
 
       console.log("Programaciones en seguimiento:", this.seguimientos);
-      console.log( 'Filtraciones', this.filteredProgramaciones)
+      console.log('Filtraciones', this.filteredProgramaciones)
+      console.log('Filtraciones', this.filterSeguimiento)
     } catch (error) {
       console.error('Error al obtener programaciones en seguimiento:', error);
     }
   }
+
+  getNombresTrabajadores(trabajadores: any[]): string {
+    if (!trabajadores || trabajadores.length === 0) return 'Sin trabajadores';
+    return trabajadores.map(t => t.nombre).join(', ');
+  }
+  
 
   async getEstado() {
     try {
@@ -259,11 +270,34 @@ export class ProgramacionPage implements OnInit {
   async getTrabajadores() {
     try {
       this.trabajadores = await this.trabajadoresService.obtenerLocal('trabajador')
+      this.trabajadoresFilter = [...this.trabajadores]
       console.log(this.trabajadores)
     } catch (error) {
       console.error('Error al cargar los trabajadores')
       this.trabajadores = []
     }
+  }
+
+  search() {
+    const search = this.searchTrabajador.trim().toLowerCase();
+    this.trabajadoresFilter = this.trabajadores.filter(trabajador =>
+      trabajador.nombre.toLowerCase().startsWith(search)
+    );
+  }
+
+  selectTrabajador(trabajador: any) {
+    // Evitar duplicados
+    if (!this.trabajadoresSeleccionados.find(t => t.id === trabajador.id)) {
+      this.trabajadoresSeleccionados.push(trabajador);
+    }
+
+    // Limpiar búsqueda
+    this.searchTrabajador = '';
+    this.trabajadoresFilter = [];
+  }
+
+  removeTrabajador(trabajadorId: number) {
+    this.trabajadoresSeleccionados = this.trabajadoresSeleccionados.filter(t => t.id !== trabajadorId);
   }
 
   filter() {
@@ -319,9 +353,9 @@ export class ProgramacionPage implements OnInit {
 
   async getProgramacionUsuario(usuario: string) {
     try {
-        this.filteredProgramaciones = await this.programacionService.getProgramaciones('programacion', usuario, null, 1);
+      this.filteredProgramaciones = await this.programacionService.getProgramaciones('programacion', usuario, null, 1);
     } catch (error) {
-        console.error('Error al obtener programaciones:', error);
+      console.error('Error al obtener programaciones:', error);
     }
   }
 
@@ -371,7 +405,7 @@ export class ProgramacionPage implements OnInit {
       });
   }
 
-  async createFromExistingProgramacion(baseProgramacionId: number) {
+  async create(baseProgramacionId: number) {
     // Buscar la programación original
     const baseProgramacion = this.programaciones.find(prog => prog.id === baseProgramacionId);
 
@@ -398,7 +432,7 @@ export class ProgramacionPage implements OnInit {
     const cantidadTotal = registrosRelacionados.reduce(
       (suma, prog) => suma + prog.cantidad, 0) + nuevaCantidad; // Incluir la cantidad de la nueva programación
 
-      console.log(cantidadTotal)
+    console.log(cantidadTotal)
     const nuevoEstadoId = cantidadTotal >= baseProgramacion.cantidad ? 3 : 2; // Estado: 3 = Terminado, 2 = En Proceso
 
     const nuevoLote = this.form.get('lote')?.value || "";
@@ -409,7 +443,6 @@ export class ProgramacionPage implements OnInit {
       programacion: baseProgramacion.id,
       fecha: this.inputs.get('fecha')?.value || new Date().toISOString(), // Tomar del formulario o fecha actual
       lote: nuevoLote,
-      trabajador: this.inputs.get('trabajador')?.value || "",
       jornal: this.inputs.get('jornal')?.value || baseProgramacion.jornal,
       cantidad: this.inputs.get('cantidad')?.value != null ? this.inputs.get('cantidad')?.value : baseProgramacion.cantidad,
       habilitado: 1, // Activado por defecto
@@ -427,7 +460,8 @@ export class ProgramacionPage implements OnInit {
       fincaId: baseProgramacion.fincaId,
       actividadId: baseProgramacion.actividadId,
       estadoId: nuevoEstadoId, // Usar el estado calculado
-      prioridadId: baseProgramacion.prioridadId
+      prioridadId: baseProgramacion.prioridadId,
+      trabajadores: this.trabajadoresSeleccionados.map(t => ({ trabajadorId: t.id}))
     };
 
     console.log(nuevaProgramacion)
@@ -477,7 +511,7 @@ export class ProgramacionPage implements OnInit {
         // Guardar los cambios
         await this.programacionService.updateEst(actualizaciones, 'programacion');
       }
-      
+
       // Insertar la nueva programación en la base de datos
       await this.programacionService.create([nuevaProgramacion], 'programacion');
       console.log([nuevaProgramacion])
@@ -485,6 +519,8 @@ export class ProgramacionPage implements OnInit {
       this.toastService.presentToast('Registro realizado', 'success', 'top');
       this.getprogramacion(); // Actualizar la lista de programaciones
       this.inputs.reset();
+      this.trabajadoresSeleccionados = []; 
+      this.searchTrabajador = '';
       this.onCloseForm();
     } catch (error) {
       console.error('Error al crear nueva programación:', error);

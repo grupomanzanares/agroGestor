@@ -217,7 +217,7 @@
             </form>
           </ion-item>
 
-          <!-- Select Trabajador -->
+          <!-- Select Trabajador
           <ion-item class="ion-margin-top" *ngIf="+selectedProgramacion?.controlPorTrabajador === 1">
             <ion-select interface="popover" placeholder="Selecciona un trabajador" formControlName="trabajador"
               interface="popover">
@@ -225,7 +225,30 @@
                 {{ trabajador.nombre }}
               </ion-select-option>
             </ion-select>
-          </ion-item>
+          </ion-item> -->
+
+          <ion-item class="ion-margin-top" *ngIf="+selectedProgramacion?.controlPorTrabajador === 1">
+            <ion-label position="stacked">Buscar Trabajador</ion-label>
+            <ion-input
+              type="text"
+              placeholder="Escribe el nombre del trabajador"
+              [(ngModel)]="searchTrabajador"
+              [ngModelOptions]="{ standalone: true }"
+              (ionInput)="search()"
+              autocomplete="off">
+            </ion-input>
+          </ion-item>                 
+
+          <ion-list *ngIf="trabajadoresFilter.length > 0 && searchTrabajador">
+            <ion-item *ngFor="let item of trabajadoresFilter" (click)="selectTrabajador(item)">
+              {{ item.nombre }}
+            </ion-item>
+          </ion-list>   
+          
+          <ion-chip color="primary" *ngFor="let trabajador of trabajadoresSeleccionados">
+            <ion-label>{{ trabajador.nombre }}</ion-label>
+            <ion-icon name="close-circle" (click)="removeTrabajador(trabajador.id)"></ion-icon>
+          </ion-chip>          
 
           <!-- Input cantidad -->
           <ion-item>
@@ -259,7 +282,7 @@
           <ion-row>
             <ion-col size="6">
               <ion-button expand="block" color="primary"
-                (click)="createFromExistingProgramacion(selectedProgramacion.id)">Guardar</ion-button>
+                (click)="create(selectedProgramacion.id)">Guardar</ion-button>
             </ion-col>
             <ion-col size="6">
               <ion-button expand="block" color="danger" (click)="onCloseForm()">Cancelar</ion-button>
@@ -322,7 +345,7 @@
             <ion-card-content>
               <strong>Fecha: </strong>{{ item.fecha }}<br>
               <strong>Actividad:</strong> {{ item.actividadNombre }}<br>
-              <strong>Trabajador:</strong> {{ item.trabajadorNombre }}<br>
+              <strong>Trabajadores:</strong> {{ getNombresTrabajadores(item.trabajadores) }}<br>
               <strong>Finca:</strong> {{ item.fincaNombre }}<br>
               <strong>Prioridad:</strong>
               <span class="priority-indicator" [ngClass]="getPrioridadClass(item.prioridadNombre)">

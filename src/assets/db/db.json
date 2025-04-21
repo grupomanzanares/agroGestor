@@ -231,6 +231,16 @@
                 { "column": "prioridadId", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(prioridadId) REFERENCES prioridad(id)" },
                 { "column": "trabajador", "value": "INTEGER NULL", "foreignkey": "FOREIGN KEY(trabajador) REFERENCES trabajador(id)" }
             ]
+        },
+        {
+            "name": "programacion_trabajadores",
+            "schema": [
+              { "column": "programacionId", "value": "INTEGER NOT NULL" },
+              { "column": "trabajadorId", "value": "INTEGER NOT NULL" },
+              { "column": "sincronizacion", "value": "INTEGER"},
+              { "foreignkey": "programacionId", "value": "REFERENCES programacion(id)" },
+              { "foreignkey": "trabajadorId", "value": "REFERENCES trabajador(id)" }
+            ]
         }
     ]
 }

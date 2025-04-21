@@ -3,7 +3,7 @@ export class Programacion{
     programacion: number;
     fecha: string;
     lote: string;
-    trabajador: string
+    trabajador?: string
     jornal: number;
     cantidad: number;
     habilitado: number;
@@ -28,5 +28,8 @@ export class Programacion{
     responsableNombre?: string;
     estadoNombre?: string;
     prioridadNombre?: string;
-    trabajadorNombre?: string
+    trabajadorNombre?: string;
+    trabajadores?: {
+        trabajadorId: number;
+      }[];
 }

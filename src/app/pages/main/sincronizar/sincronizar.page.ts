@@ -8,6 +8,7 @@ import { FincaslotesService } from 'src/app/services/fincaslotes.service';
 import { IdentificacionService } from 'src/app/services/identificacion.service';
 import { PrioridadService } from 'src/app/services/prioridad.service';
 import { ProgramacionService } from 'src/app/services/programacion.service';
+import { PromatrabajadorService } from 'src/app/services/promatrabajador.service';
 import { SubcategoriaService } from 'src/app/services/subcategoria.service';
 import { SucursalService } from 'src/app/services/sucursal.service';
 import { ToastService } from 'src/app/services/toast.service';
@@ -36,6 +37,7 @@ export class SincronizarPage implements OnInit {
   lotes: { lote: string, nombre: string, finca: number, ccosto: string }[] = [];
   trabajadores: { id: number, nombre: string }[] = []
   identificaciones: { id: number, nombre: string }[] = []
+  proma_trabajador: { programacionId: number, trabajadorId: number }
 
   constructor(
     private fincaService: FincaService,
@@ -52,7 +54,8 @@ export class SincronizarPage implements OnInit {
     private loteService: FincaslotesService,
     private trabajadorService: TrabajadorService,
     private identificacionService: IdentificacionService,
-    private uploadDataService: UploadDataService
+    private uploadDataService: UploadDataService,
+    private proma_trabajadorService: PromatrabajadorService
   ) { }
 
   ngOnInit() {
@@ -135,11 +138,12 @@ export class SincronizarPage implements OnInit {
     const conexion = Network.getStatus();
     try {
       if ((await conexion).connected) {
-
+        
         console.log("Iniciando subida de datos...");
-
+        
         // Llamar a la función de sincronización del `UploadDataService`
         const sincronizacionExitosa = await this.uploadDataService.sincronizacion('programacion', 'programacion');
+        await this.proma_trabajadorService.sincronizar('programacion_trabajadores', 'programacion_trabajadores')
 
         if (sincronizacionExitosa) {
           this.toasService.presentToast('Datos subidos correctamente', 'success', 'top');

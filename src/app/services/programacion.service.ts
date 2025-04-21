@@ -70,7 +70,7 @@ export class ProgramacionService {
     }
   }
 
-  async getProgramaciones(tabla: string, usuario: string | null = null, programacionId: number | null = null, signo: number | null = null ): Promise<any[]> {
+  async getProgramaciones(tabla: string, usuario: string | null = null, programacionId: number | null = null, signo: number | null = null): Promise<any[]> {
     let sql = `
       SELECT 
         p.id,
@@ -95,7 +95,7 @@ export class ProgramacionService {
         p.responsableId,
         p.estadoId,
         p.prioridadId,
-        p.trabajador ,
+        p.trabajador,
         t.nombre AS trabajadorNombre,
         a.nombre AS actividadNombre,
         a.controlPorLote AS controlPorLote,
@@ -104,7 +104,11 @@ export class ProgramacionService {
         s.nombre AS sucursalNombre,
         u.name AS responsableNombre,
         e.nombre AS estadoNombre,
-        pr.nombre AS prioridadNombre
+        pr.nombre AS prioridadNombre,
+         (SELECT JSON_GROUP_ARRAY(JSON_OBJECT('id', t.id, 'nombre', t.nombre))
+          FROM programacion_trabajadores pt
+          JOIN trabajador t ON pt.trabajadorId = t.id
+          WHERE pt.programacionId = p.id) AS trabajadores
       FROM 
         ${tabla} p
       LEFT JOIN trabajador t ON p.trabajador = t.id
@@ -115,34 +119,34 @@ export class ProgramacionService {
       LEFT JOIN estado e ON p.estadoId = e.id
       LEFT JOIN prioridad pr ON p.prioridadId = pr.id
       WHERE 1=1`;  // 🔹 Evita errores en SQL y permite agregar condiciones dinámicamente
-  
+
     // 🔹 Agregar filtros opcionales dinámicamente
     const values: any[] = [];
-  
+
     if (signo !== null) {
       sql += ` AND p.signo = ?`;
       values.push(signo);
     }
-  
+
     if (usuario !== null) {
       sql += ` AND u.name = ?`;
       values.push(usuario);
     }
-  
+
     if (programacionId !== null) {
       sql += ` AND p.programacion = ?`;
       values.push(programacionId);
     }
-  
+
     const db = await this.sqlService.getDbName();
-  
+
     try {
       const response = await CapacitorSQLite.query({
         database: db,
         statement: sql,
         values: values
       });
-  
+
       if (response.values && response.values.length > 0) {
         const mesActual = new Date().getMonth() + 1;
         const anoActual = new Date().getFullYear();
@@ -178,7 +182,8 @@ export class ProgramacionService {
           sucursalNombre: row.sucursalNombre || 'Sin nombre',
           responsableNombre: row.responsableNombre || 'Sin nombre',
           estadoNombre: row.estadoNombre || 'Sin nombre',
-          prioridadNombre: row.prioridadNombre || 'Sin nombre'
+          prioridadNombre: row.prioridadNombre || 'Sin nombre',
+          trabajadores: row.trabajadores ? JSON.parse(row.trabajadores) : []
         })).filter(row => {
           const [year, month] = row.fecha.split('-').map(Number);
           return year === anoActual && month === mesActual;
@@ -337,6 +342,33 @@ export class ProgramacionService {
         } else {
           console.log(`Programacion con id ${datos.id} no requiere de actualizacion`)
         }
+
+        /** Aqui */
+
+        // //Borramos datos por  ${datos.id} para asegurarnos de que no hay datos por esa programacion
+        // await CapacitorSQLite.execute({
+        //   database: db,
+        //   statements: `
+        //     DELETE FROM programacion_trabajadores WHERE programacionId = ${datos.id};
+        //   `
+        // });
+
+
+        // // 👉 Insertar en tabla "programacion_trabajadores"
+        // if (Array.isArray(datos.trabajadores)) {
+        //   for (const trabajador of datos.trabajadores) {
+        //     await CapacitorSQLite.execute({
+        //       database: db,
+        //       statements: `
+        //       INSERT INTO programacion_trabajadores (programacionId, trabajadorId)
+        //       VALUES (${datos.id}, ${trabajador.trabajadorId});
+        //       `
+        //     });
+        //     console.log('Trabajadores insertados', trabajador)
+        //   }
+        // }
+
+
       }
     } catch (error) {
       console.error('Error al actualizar las categorias')
@@ -346,8 +378,9 @@ export class ProgramacionService {
   async create(datosParaCrear: Programacion[], tabla: string) {
     const db = await this.sqlService.getDbName();
     const sql = `INSERT INTO ${tabla} 
-      (id, programacion, fecha, lote, trabajador, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, responsableId, fincaId, actividadId, estadoId, prioridadId) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      (id, programacion, fecha, lote, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, responsableId, fincaId, actividadId, estadoId, prioridadId) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
 
     try {
       for (const datos of datosParaCrear) {
@@ -358,6 +391,7 @@ export class ProgramacionService {
         });
 
         if (exsDatos.values.length === 0) {
+          // 👉 Insertar en tabla "programacion"
           await CapacitorSQLite.executeSet({
             database: db,
             set: [{
@@ -367,7 +401,6 @@ export class ProgramacionService {
                 datos.programacion,
                 datos.fecha,
                 datos.lote,
-                datos.trabajador,
                 datos.jornal,
                 datos.cantidad,
                 datos.habilitado,
@@ -389,9 +422,33 @@ export class ProgramacionService {
               ]
             }]
           });
-          // console.log(`Programacion con id ${datos.id} creada con exito: ${datos}`, datos);
+
+          // 👉 Insertar en tabla "programacion_trabajadores"
+          if (Array.isArray(datos.trabajadores)) {
+
+
+            //Borramos datos por  ${datos.id} para asegurarnos de que no hay datos por esa programacion
+            await CapacitorSQLite.execute({
+              database: db,
+              statements: `
+                  DELETE FROM programacion_trabajadores WHERE programacionId = ${datos.id};
+                `
+            });
+
+            for (const trabajador of datos.trabajadores) {
+              await CapacitorSQLite.execute({
+                database: db,
+                statements: `
+                INSERT INTO programacion_trabajadores (programacionId, trabajadorId, sincronizacion)
+                VALUES (${datos.id}, ${trabajador.trabajadorId}, 0);
+                `
+              });
+              console.log('Trabajadores insertados', trabajador)
+            }
+          }
+
         } else {
-          // console.log(`Programacion con id ${datos.id} ya existe, omitiendo la insercion`);
+          // Ya existe, puedes actualizar o ignorar
         }
       }
     } catch (error) {

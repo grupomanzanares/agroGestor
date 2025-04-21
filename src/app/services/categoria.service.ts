@@ -157,7 +157,7 @@ export class CategoriaService {
             database: db,
             set: [{
               statement: sql,
-              values: [
+              values: [ 
                 datos.id,
                 datos.nombre,
                 datos.descripcion,
