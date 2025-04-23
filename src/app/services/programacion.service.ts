@@ -342,33 +342,6 @@ export class ProgramacionService {
         } else {
           console.log(`Programacion con id ${datos.id} no requiere de actualizacion`)
         }
-
-        /** Aqui */
-
-        // //Borramos datos por  ${datos.id} para asegurarnos de que no hay datos por esa programacion
-        // await CapacitorSQLite.execute({
-        //   database: db,
-        //   statements: `
-        //     DELETE FROM programacion_trabajadores WHERE programacionId = ${datos.id};
-        //   `
-        // });
-
-
-        // // 👉 Insertar en tabla "programacion_trabajadores"
-        // if (Array.isArray(datos.trabajadores)) {
-        //   for (const trabajador of datos.trabajadores) {
-        //     await CapacitorSQLite.execute({
-        //       database: db,
-        //       statements: `
-        //       INSERT INTO programacion_trabajadores (programacionId, trabajadorId)
-        //       VALUES (${datos.id}, ${trabajador.trabajadorId});
-        //       `
-        //     });
-        //     console.log('Trabajadores insertados', trabajador)
-        //   }
-        // }
-
-
       }
     } catch (error) {
       console.error('Error al actualizar las categorias')
@@ -381,8 +354,15 @@ export class ProgramacionService {
       (id, programacion, fecha, lote, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, responsableId, fincaId, actividadId, estadoId, prioridadId) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-
     try {
+      // 1. Crear la tabla si no existe
+      await CapacitorSQLite.execute({
+        database: db,
+        statements: `CREATE TABLE IF NOT EXISTS programacion_trabajadores ( id INTEGER PRIMARY KEY AUTOINCREMENT, programacionId INTEGER NOT NULL, 
+                    trabajadorId INTEGER NOT NULL, sincronizacion INTEGER DEFAULT 0, FOREIGN KEY (programacionId) REFERENCES programacion(id),
+                    FOREIGN KEY (trabajadorId) REFERENCES trabajador(id) );`
+      });
+
       for (const datos of datosParaCrear) {
         const exsDatos = await CapacitorSQLite.query({
           database: db,
@@ -436,19 +416,21 @@ export class ProgramacionService {
             });
 
             for (const trabajador of datos.trabajadores) {
-              await CapacitorSQLite.execute({
+              // 2. Insertar el trabajador como lo venías haciendo
+              await CapacitorSQLite.executeSet({
                 database: db,
-                statements: `
-                INSERT INTO programacion_trabajadores (programacionId, trabajadorId, sincronizacion)
-                VALUES (${datos.id}, ${trabajador.trabajadorId}, 0);
-                `
-              });
+                set: [{
+                  statement: `
+                    INSERT INTO programacion_trabajadores (programacionId, trabajadorId, sincronizacion)
+                    VALUES (?, ?, ?);
+                  `,
+                  values: [datos.id, trabajador.trabajadorId, 0]
+                }]
+              });                         
               console.log('Trabajadores insertados', trabajador)
             }
           }
 
-        } else {
-          // Ya existe, puedes actualizar o ignorar
         }
       }
     } catch (error) {

@@ -216,6 +216,8 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
+  
+
   async getSeguimiento(id: number) {
     try {
       if (!this.selectedProgramacion) {

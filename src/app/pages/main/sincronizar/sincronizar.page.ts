@@ -37,7 +37,7 @@ export class SincronizarPage implements OnInit {
   lotes: { lote: string, nombre: string, finca: number, ccosto: string }[] = [];
   trabajadores: { id: number, nombre: string }[] = []
   identificaciones: { id: number, nombre: string }[] = []
-  proma_trabajador: { programacionId: number, trabajadorId: number }
+  proma_trabajador: { programacionId: number, trabajadorId: number }[] = []
 
   constructor(
     private fincaService: FincaService,
@@ -77,6 +77,7 @@ export class SincronizarPage implements OnInit {
       const lote = await this.loteService.obtenerDtLocal('fincalotes');
       const identificacion = await this.identificacionService.obtenerDtLocal('tp_identificacion');
       const trabajador = await this.trabajadorService.obtenerLocal('trabajador')
+      const proma_tra = await this.proma_trabajadorService.obtenerLocal('programacion_trabajadores')
       this.users = (user)
       this.fincas = (finca)
       this.sucursales = (sucursal)
@@ -90,6 +91,7 @@ export class SincronizarPage implements OnInit {
       this.lotes = (lote)
       this.identificaciones = (identificacion)
       this.trabajadores = (trabajador)
+      this.proma_trabajador = (proma_tra)
     } catch (error) {
       console.error('Error al cargar los datos locales:', error)
     }
@@ -122,6 +124,8 @@ export class SincronizarPage implements OnInit {
         await this.loteService.sincronizarLote('fincalote', 'fincalotes');
         await this.identificacionService.sincronizar('tiposidentificacion', 'tp_identificacion'),
         await this.trabajadorService.sincronizar('trabajador', "trabajador")
+        await this.proma_trabajadorService.descargarDatosVps('programacion_trabajadores', 'programacion_trabajadores')
+        
         await this.cargar();
         console.log('Sincronización completada exitosamente.');
       } else {

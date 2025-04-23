@@ -51,6 +51,121 @@ export class PromatrabajadorService {
     }
   }
 
+  comparacion(endPoint: string, tabla: string): Observable<{ update: Proma_Trabajador[], create: Proma_Trabajador[] }> {
+    return forkJoin({
+      vpsDatos: this.obternerVps(endPoint),
+      localDatos: this.obtenerLocal(tabla)
+    }).pipe(
+      map(result => {
+        const { vpsDatos, localDatos } = result
+
+        if (localDatos.length === 0) {
+          console.log('No hay datos locales, todos los datos del VPS serán creados.')
+          return { update: [], create: vpsDatos }
+        }
+
+        const update = vpsDatos.filter(vpsDato => {
+          const localDato = localDatos.find(localDato => localDato.programacionId === vpsDato.programacionId)
+          if (!localDato) return false
+
+          return (
+            vpsDato.trabajadorId !== localDato.trabajadorId ||
+            vpsDato.programacionId !== localDato.programacionId ||
+            vpsDato.sincronizacion !== localDato.sincronizacion
+          )
+        })
+
+        const create = vpsDatos.filter(vpsDato => !localDatos.some(localDato => localDato.trabajadorId === vpsDato.trabajadorId))
+        return { update, create }
+      })
+    )
+  }
+
+  async update(datosDiferentes: Proma_Trabajador[], tabla: string) {
+    if (datosDiferentes.length === 0) {
+      console.log(`No hay datos diferentes para actualizar`)
+      return
+    }
+
+    const db = await this.sqlService.getDbName()
+    const sql = `UPDATE ${tabla} SET trabajadorId=?, sincronizacion=?`
+
+    try {
+      for (const datos of datosDiferentes) {
+        let cambios = []
+
+        if (datos.trabajadorId !== undefined) cambios.push('trabajadorId');
+        if (datos.sincronizacion !== undefined) cambios.push('sincronizacion');
+
+        await CapacitorSQLite.executeSet({
+          database: db,
+          set: [
+            {
+              statement: sql,
+              values: [
+                datos.trabajadorId || null,
+                datos.sincronizacion || null
+              ]
+            }
+          ]
+        })
+        if (cambios.length > 0) {
+          console.log(`Programacion Trabajador con id ${datos.programacionId} actualizado correctamente`)
+        }
+        else {
+          console.log(`Programacion Trabajador con id ${datos.programacionId} no requiere de actualizacio`)
+        }
+      }
+    } catch (error) {
+      console.error('Error al actualizar las Programaciones y Trabajadores: ', error)
+    }
+  }
+
+  async create(datosParaCrear: Proma_Trabajador[], tabla: string) {
+    const db = await this.sqlService.getDbName();
+    const sql = `INSERT INTO ${tabla} (programacionId, trabajadorId, sincronizacion) VALUES (?, ?, ?)`
+
+    try {
+      for (const datos of datosParaCrear) {
+        const exsDatos = await CapacitorSQLite.query({
+          database: db,
+          statement: `SELECT programacionId FROM ${tabla} WHERE programacionId = ?`,
+          values: [datos.programacionId]
+        })
+
+        if (exsDatos.values && exsDatos.values.length === 0) {
+          await CapacitorSQLite.executeSet({
+            database: db,
+            set: [{
+              statement: sql,
+              values: [
+                datos.programacionId,
+                datos.trabajadorId,
+                datos.sincronizacion
+              ]
+            }]
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error al crear nuevos datos:', error);
+    }
+  }
+
+  async descargarDatosVps(tabla: string, endPoint: string) {
+    try {
+      const { create } = await lastValueFrom(this.comparacion(endPoint, tabla));
+      if (!create || create.length === 0) {
+        console.log('No hay datos nuevos del VPS para guardar localmente.');
+        return;
+      }
+      await this.create(create, tabla);
+      console.log('Datos del VPS guardados localmente.');
+    } catch (error) {
+      console.error('Error al descargar datos desde el VPS:', error);
+    }
+  }
+
   async sincronizar(endPoint: string, tabla: string) {
     try {
       const trabajadores = await this.obtenerLocal(tabla)
@@ -63,13 +178,10 @@ export class PromatrabajadorService {
 
       console.log('Datos que se van a subir al VPS:', trabajadores);
 
-
       const payload = {
         programacionId,
         trabajadores
       };
-
-     
 
       const token = localStorage.getItem('token')
       const headers = new HttpHeaders({
