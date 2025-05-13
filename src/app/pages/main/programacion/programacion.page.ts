@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Estado } from 'src/app/models/estado';
+import { Finca } from 'src/app/models/finca';
 import { Prioridad } from 'src/app/models/prioridad';
 import { Programacion } from 'src/app/models/programacion';
 import { EstadoService } from 'src/app/services/estado.service';
+import { FincaService } from 'src/app/services/finca.service';
 import { FincaslotesService } from 'src/app/services/fincaslotes.service';
 import { PrioridadService } from 'src/app/services/prioridad.service';
 import { ProgramacionService } from 'src/app/services/programacion.service';
+import { PromatrabajadorService } from 'src/app/services/promatrabajador.service';
 import { ToastService } from 'src/app/services/toast.service';
 import { TrabajadorService } from 'src/app/services/trabajador.service';
 
@@ -25,6 +28,7 @@ export class ProgramacionPage implements OnInit {
   programaciones: Programacion[] = [];
   filteredProgramaciones: Programacion[] = [];
   prioridades: Prioridad[] = [];
+  fincas: Finca[] = [];
   estados: Estado[] = [];
   filterPriori: string = null;
   selectedProgramacion: any = null;
@@ -36,6 +40,7 @@ export class ProgramacionPage implements OnInit {
   form: FormGroup;
   seguimientos: Programacion[] = []
   filterSeguimiento: Programacion[] = []
+  filterFinca: string = null;
   searchTrabajador: string = ''
   trabajadoresSeleccionados: any[] = [];
   usuarioLogeo = localStorage.getItem('userName')
@@ -57,6 +62,8 @@ export class ProgramacionPage implements OnInit {
     private toastService: ToastService,
     private lotesService: FincaslotesService,
     private trabajadoresService: TrabajadorService,
+    private promaTrabajador: PromatrabajadorService,
+    private fincaService: FincaService
   ) {
     this.seguimiento = false
   }
@@ -64,6 +71,7 @@ export class ProgramacionPage implements OnInit {
   ngOnInit() {
     this.getprogramacion();
     this.getPrioridad();
+    this.getFincas()
     this.getEstado()
     this.getLotes()
     this.getTrabajadores()
@@ -71,7 +79,7 @@ export class ProgramacionPage implements OnInit {
       seleccionarTodos: new FormControl(false)
     });
     this.getProgramacionUsuario(this.usuarioLogeo)
-
+    // this.getNombresTrabajadores()
   }
 
   async onShowForm(programacion: Programacion) {
@@ -259,6 +267,14 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
+  async getFincas() {
+    try {
+      this.fincas = await this.fincaService.obtenerDtLocal('finca');
+    } catch (error) {
+      console.error('Error al obtener fincas:', error);
+    }
+  }
+  
   async getLotes() {
     try {
       this.lotes = await this.lotesService.obtenerDtLocal('fincalotes') || []
@@ -303,16 +319,25 @@ export class ProgramacionPage implements OnInit {
   }
 
   filter() {
+    this.filteredProgramaciones = this.programaciones;
+
     if (this.filterPriori) {
-      this.filteredProgramaciones = this.programaciones.filter((p) => p.prioridadNombre === this.filterPriori);
-    } else {
-      this.toastService.presentToast('No has seleccionado alguna prioridad', 'danger', 'top')
+      this.filteredProgramaciones = this.filteredProgramaciones.filter(p => p.prioridadNombre === this.filterPriori);
+    }
+  
+    if (this.filterFinca) {
+      this.filteredProgramaciones = this.filteredProgramaciones.filter(p => p.fincaNombre === this.filterFinca);
+    }
+  
+    if (!this.filterPriori && !this.filterFinca) {
+      this.toastService.presentToast('No has seleccionado ningún filtro', 'danger', 'top');
     }
   }
 
   resetFilters() {
     this.filterPriori = null;
-    this.filteredProgramaciones = null;
+    this.filterFinca = null;
+    this.filteredProgramaciones = [...this.programaciones];
   }
 
   getPendientes(): Programacion[] {
@@ -370,6 +395,11 @@ export class ProgramacionPage implements OnInit {
     return this.estados.filter(e => e.id >= programacion.estadoId);
   }
 
+  async verificarTrabajadores() {
+    const datos = await this.promaTrabajador.obtenerLocal('programacion_trabajadores');
+    console.log(datos);
+  }  
+
   //Funciion para guardar el proceso y los comentarios  en que va la programacion
   saveChange(programacion: any) {
     if (this.inputs.invalid) {
@@ -423,9 +453,12 @@ export class ProgramacionPage implements OnInit {
     }
 
     // Calcular el nuevo ID basado en el ID original
-    const registrosRelacionados = await this.programacionService.getProgramaciones('programacion', null, baseProgramacionId, -1); // <--- CORREGIDO
-    const ultimoRegistro = registrosRelacionados.length > 0 ? Math.max(...registrosRelacionados.map(prog => prog.id)) : baseProgramacionId * 1000;
-    const nuevoId = ultimoRegistro + 1; // Generar nuevo ID consecutivo
+    const registrosRelacionados = await this.programacionService.getProgramaciones('programacion', null, baseProgramacionId, -1)
+    // const ultimoRegistro = registrosRelacionados.length > 0 ? Math.max(...registrosRelacionados.map(prog => prog.id)) : baseProgramacionId * 1000;
+    // const nuevoId = ultimoRegistro + 1; // Generar nuevo ID consecutivo
+
+    const nuevoIdEjecucion = await this.programacionService.getMaxEjecucion('programacion',  baseProgramacionId, -1)
+
 
     // Calcular la suma de las cantidades de programaciones relacionadas
     const nuevaCantidad = this.inputs.get('cantidad')?.value || 0;
@@ -441,7 +474,7 @@ export class ProgramacionPage implements OnInit {
 
     // Crear la nueva programación tomando como base la original
     const nuevaProgramacion: Programacion = {
-      id: nuevoId,
+      id: nuevoIdEjecucion,
       programacion: baseProgramacion.id,
       fecha: this.inputs.get('fecha')?.value || new Date().toISOString(), // Tomar del formulario o fecha actual
       lote: nuevoLote,
@@ -467,7 +500,7 @@ export class ProgramacionPage implements OnInit {
     };
 
     console.log(nuevaProgramacion)
-
+    
     try {
       const actualizaciones: Programacion[] = [];
 
@@ -489,7 +522,7 @@ export class ProgramacionPage implements OnInit {
           updatedAt: new Date().toISOString(),
           usuarioMod: localStorage.getItem('userName')
         });
-        // Guardar los cambios
+        // Guardar los cambiosFcre
         await this.programacionService.updateEst(actualizaciones, 'programacion');
       }
 
@@ -502,7 +535,7 @@ export class ProgramacionPage implements OnInit {
             usuarioMod: localStorage.getItem('userName')
           });
         });
-
+        
         // También actualizar la programación original
         actualizaciones.push({
           ...baseProgramacion,
@@ -516,7 +549,14 @@ export class ProgramacionPage implements OnInit {
 
       // Insertar la nueva programación en la base de datos
       await this.programacionService.create([nuevaProgramacion], 'programacion');
+      await this.promaTrabajador.create(nuevaProgramacion.trabajadores.map(t => ({
+        programacionId: nuevaProgramacion.id,
+        trabajadorId: t.trabajadorId,
+        sincronizado: 0
+      })), 'programacion_trabajadores');
+      
       console.log([nuevaProgramacion])
+      console.log(this.verificarTrabajadores())
 
       this.toastService.presentToast('Registro realizado', 'success', 'top');
       this.getprogramacion(); // Actualizar la lista de programaciones

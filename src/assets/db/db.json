@@ -237,9 +237,7 @@
             "schema": [
               { "column": "programacionId", "value": "INTEGER NOT NULL" },
               { "column": "trabajadorId", "value": "INTEGER NOT NULL" },
-              { "column": "sincronizacion", "value": "INTEGER"},
-              { "foreignkey": "programacionId", "value": "REFERENCES programacion(id)" },
-              { "foreignkey": "trabajadorId", "value": "REFERENCES trabajador(id)" }
+              { "column": "sincronizado", "value": "INTEGER"}
             ]
         }
     ]

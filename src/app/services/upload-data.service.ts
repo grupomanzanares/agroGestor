@@ -5,6 +5,7 @@ import { ToastService } from './toast.service';
 import { Programacion } from '../models/programacion';
 import { ProgramacionService } from './programacion.service';
 import { lastValueFrom } from 'rxjs';
+import { PromatrabajadorService } from './promatrabajador.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,8 @@ export class UploadDataService {
   constructor(
     private http: HttpClient,
     private toast: ToastService,
-    private programacion: ProgramacionService
+    private programacion: ProgramacionService,
+    private promatrabajadorService: PromatrabajadorService
   ) { }
 
   obtenerVpsDatos(endPoint: string) {
@@ -35,7 +37,15 @@ export class UploadDataService {
         console.error("Error: la api no devolvio un array valido", vpsDatos)
       }
 
-      const localDatos = await this.programacion.obtenerLocal(tabla);
+      const localProgramaciones = await this.programacion.obtenerLocal(tabla);
+      const trabajadoresLocal = await this.promatrabajadorService.obtenerLocal('programacion_trabajadores');
+      
+      // Adjuntar trabajadores a cada programación
+      const localDatos = localProgramaciones.map(prog => ({
+        ...prog
+        // trabajadores: trabajadoresLocal.filter(t => t.programacionId === prog.id)
+      }));
+      
 
       if (!Array.isArray(localDatos)) {
         console.error("No hay datos locales disponibles para sincronizar con el VPS")
@@ -110,6 +120,7 @@ export class UploadDataService {
       console.log("Enviando datos nuevos al VPS:", datos);
 
       let camId = []
+      let traId = []
 
       for (const dato of datos) {
         const url = `${this.apiUrl}${endPoint}/create`
@@ -127,14 +138,15 @@ export class UploadDataService {
             idLocal: dato.id,
             nuevoId: response.id
           })
-        }
+        }    
 
         if (camId.length > 0) {
           await this.programacion.updateId(camId, 'programacion')
+          await this.programacion.updateIdTrabajadores(camId, 'programacion_trabajadores')
         }
       }
 
-      this.toast.presentToast('Datos nuevos sincronizados correctamente', 'success', 'top');
+      // this.toast.presentToast('Datos nuevos sincronizados correctamente', 'success', 'top')
       return true;
     } catch (error) {
       console.error('Error al subir datos al VPS:', error);
@@ -166,13 +178,13 @@ export class UploadDataService {
         }
   
         const url = `${this.apiUrl}${endPoint}/${item.id}`; // Se agrega el ID en la URL
-        console.log("Actualizando registro en:", url);
+        // console.log("Actualizando registro en:", url);
   
         const response = await lastValueFrom(
           this.http.put(url, item, { headers }) // Ahora incluye el ID en la URL
         );
   
-        console.log("Respuesta del VPS:", response);
+        // console.log("Respuesta del VPS:", response);
       }
   
       this.toast.presentToast('Datos actualizados correctamente en el VPS', 'success', 'top');

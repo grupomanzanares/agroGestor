@@ -24,6 +24,14 @@
           </ion-select-option>
         </ion-select>
       </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Filtrar por Finca</ion-label>
+        <ion-select interface="popover" [(ngModel)]="filterFinca" placeholder="Selecciona la finca">
+          <ion-select-option *ngFor="let finca of fincas" [value]="finca.nombre">
+            {{ finca.nombre }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>      
       <ion-row>
         <ion-col size="6">
           <ion-button expand="block" (click)="filter()">Aplicar Filtro</ion-button>
@@ -353,6 +361,7 @@
               </span>
               <br>
               <strong>Cantidad:</strong> {{ item.cantidad }} <br>
+              <strong>Jornal:</strong> {{ item.jornal }} <br>
               <strong>Estado:</strong>
               <span class="status-indicator" [ngClass]="getEstadoClass(item.estadoNombre)">
                 {{ item.estadoNombre }} <span></span>

@@ -6,6 +6,7 @@ import { Programacion } from '../models/programacion';
 import { forkJoin, lastValueFrom, map, Observable } from 'rxjs';
 import { Proma_Trabajador } from '../models/promatrabajador';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
+import { ToastService } from './toast.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class PromatrabajadorService {
 
   apiUrl = environment.apiUrl
 
-  constructor(private http: HttpClient, private sqlService: SqliteManagerService) { }
+  constructor(private http: HttpClient, private sqlService: SqliteManagerService, private toast: ToastService) { }
 
   obternerVps(endPoint: string): Observable<Proma_Trabajador[]> {
     const token = localStorage.getItem('token')
@@ -26,7 +27,7 @@ export class PromatrabajadorService {
 
   async obtenerLocal(tabla: string): Promise<Proma_Trabajador[]> {
     const db = await this.sqlService.getDbName()
-    const sql = `SELECT * FROM ${tabla} WHERE sincronizacion = 0`
+    const sql = `SELECT * FROM ${tabla} WHERE sincronizado = 0`
 
     try {
       const result = await CapacitorSQLite.query({
@@ -36,11 +37,14 @@ export class PromatrabajadorService {
       });
 
       if (result.values) {
-        const datos = await result.values.map(row => ({
+        const datos = result.values
+        .filter(row => row && row.programacionId !== undefined && row.trabajadorId !== undefined)
+        .map(row => ({
           programacionId: row.programacionId,
           trabajadorId: row.trabajadorId,
-          sincronizacion: row.sincronizacion
-        }))
+          sincronizado: row.sincronizado ?? 0
+        }));      
+        console.log(datos)
         return datos
       } else {
         throw new Error('No se encontraron datos')
@@ -71,7 +75,7 @@ export class PromatrabajadorService {
           return (
             vpsDato.trabajadorId !== localDato.trabajadorId ||
             vpsDato.programacionId !== localDato.programacionId ||
-            vpsDato.sincronizacion !== localDato.sincronizacion
+            vpsDato.sincronizado !== localDato.sincronizado
           )
         })
 
@@ -88,14 +92,14 @@ export class PromatrabajadorService {
     }
 
     const db = await this.sqlService.getDbName()
-    const sql = `UPDATE ${tabla} SET trabajadorId=?, sincronizacion=?`
+    const sql = `UPDATE ${tabla} SET trabajadorId=?, sincronizado=?`
 
     try {
       for (const datos of datosDiferentes) {
         let cambios = []
 
         if (datos.trabajadorId !== undefined) cambios.push('trabajadorId');
-        if (datos.sincronizacion !== undefined) cambios.push('sincronizacion');
+        if (datos.sincronizado !== undefined) cambios.push('sincronizado');
 
         await CapacitorSQLite.executeSet({
           database: db,
@@ -104,7 +108,7 @@ export class PromatrabajadorService {
               statement: sql,
               values: [
                 datos.trabajadorId || null,
-                datos.sincronizacion || null
+                datos.sincronizado || null
               ]
             }
           ]
@@ -123,7 +127,7 @@ export class PromatrabajadorService {
 
   async create(datosParaCrear: Proma_Trabajador[], tabla: string) {
     const db = await this.sqlService.getDbName();
-    const sql = `INSERT INTO ${tabla} (programacionId, trabajadorId, sincronizacion) VALUES (?, ?, ?)`
+    const sql = `INSERT INTO ${tabla} (programacionId, trabajadorId, sincronizado) VALUES (?, ?, ?)`
 
     try {
       for (const datos of datosParaCrear) {
@@ -141,7 +145,7 @@ export class PromatrabajadorService {
               values: [
                 datos.programacionId,
                 datos.trabajadorId,
-                datos.sincronizacion
+                datos.sincronizado
               ]
             }]
           })
@@ -168,42 +172,56 @@ export class PromatrabajadorService {
 
   async sincronizar(endPoint: string, tabla: string) {
     try {
-      const trabajadores = await this.obtenerLocal(tabla)
-      const programacionId = trabajadores[0].programacionId
-
-      if (trabajadores.length === 0) {
-        console.log('No hay datos para crear')
-        return
+      const trabajadores = await this.obtenerLocal(tabla);
+  
+      if (!trabajadores || trabajadores.length === 0) {
+        console.log('No hay datos locales para sincronizar.');
+        return;
       }
-
+  
+      // Validar que todos los registros tienen programacionId
+      const programacionValido = trabajadores.find(t => t.programacionId !== undefined);
+      if (!programacionValido) {
+        console.error('Ningún trabajador tiene programacionId definido.');
+        return;
+      }
+  
+      const programacionId = programacionValido.programacionId;
+  
       console.log('Datos que se van a subir al VPS:', trabajadores);
-
+  
       const payload = {
         programacionId,
         trabajadores
       };
-
-      const token = localStorage.getItem('token')
+  
+      const token = localStorage.getItem('token');
       const headers = new HttpHeaders({
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       });
-
+  
       const response = await lastValueFrom(
-        this.http.post(`${this.apiUrl}${endPoint}/create  `, payload, { headers })
+        this.http.post(`${this.apiUrl}${endPoint}/create`, payload, { headers })
       );
-
-      const db = await this.sqlService.getDbName()
+  
+      console.log('Respuesta del VPS:', response);
+      this.toast.presentToast('Datos nuevos sincronizados correctamente', 'success', 'top');
+  
+      const db = await this.sqlService.getDbName();
       for (const item of trabajadores) {
-        await CapacitorSQLite.execute({
-          database: db,
-          statements: `UPDATE ${tabla} SET sincronizacion = 1 WHERE programacionId = ${item.programacionId} AND trabajadorId = ${item.trabajadorId}`
-        })
+        if (item.programacionId && item.trabajadorId) {
+          await CapacitorSQLite.execute({
+            database: db,
+            statements: `UPDATE ${tabla} SET sincronizado = 1 WHERE programacionId = ${item.programacionId} AND trabajadorId = ${item.trabajadorId}`
+          });
+        }
       }
     } catch (error) {
-      console.error('Error al sincronizar datos', error)
-      throw error
+      console.error('Error al sincronizar datos', error);
+      throw error;
     }
   }
+  
 
 }

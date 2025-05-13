@@ -124,7 +124,7 @@ export class SincronizarPage implements OnInit {
         await this.loteService.sincronizarLote('fincalote', 'fincalotes');
         await this.identificacionService.sincronizar('tiposidentificacion', 'tp_identificacion'),
         await this.trabajadorService.sincronizar('trabajador', "trabajador")
-        await this.proma_trabajadorService.descargarDatosVps('programacion_trabajadores', 'programacion_trabajadores')
+        // await this.proma_trabajadorService.descargarDatosVps('programacion_trabajadores', 'programacion_trabajadores')
         
         await this.cargar();
         console.log('Sincronización completada exitosamente.');
