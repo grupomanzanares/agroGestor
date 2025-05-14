@@ -31,5 +31,6 @@ export class Programacion{
     trabajadorNombre?: string;
     trabajadores?: {
         trabajadorId: number;
+        id?: number
       }[];
 }

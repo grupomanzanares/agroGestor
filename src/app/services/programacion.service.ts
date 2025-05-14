@@ -78,30 +78,30 @@ export class ProgramacionService {
         ${tabla} p
       WHERE sincronizado = 0
     `;
-  
+
     const values: any[] = [];
-  
+
     if (signo !== null) {
       sql += ` AND p.signo = ?`;
       values.push(signo);
     }
-  
+
     if (programacionId !== null) {
       sql += ` AND p.programacion = ?`;
       values.push(programacionId);
     }
-  
+
     const db = await this.sqlService.getDbName();
-  
+
     try {
       const response = await CapacitorSQLite.query({
         database: db,
         statement: sql,
         values: values
       });
-  
+
       const max = response.values?.[0]?.maximo;
-  
+
       // Si hay registros, sumar 1 al máximo. Si no hay, usar programacionId * 1000 + 1
       if (max !== null && max !== undefined) {
         return Number(max) + 1;
@@ -163,8 +163,8 @@ export class ProgramacionService {
       LEFT JOIN users u ON p.responsableId = u.id
       LEFT JOIN estado e ON p.estadoId = e.id
       LEFT JOIN prioridad pr ON p.prioridadId = pr.id
-      WHERE 1=1`;  
-      
+      WHERE 1=1`;
+
     const values: any[] = [];
 
     if (signo !== null) {
@@ -452,12 +452,12 @@ export class ProgramacionService {
 
 
             //Borramos datos por  ${datos.id} para asegurarnos de que no hay datos por esa programacion
-            await CapacitorSQLite.execute({
-              database: db,
-              statements: `
-                  DELETE FROM programacion_trabajadores WHERE programacionId = ${datos.id};
-                `
-            });
+            // await CapacitorSQLite.execute({
+            //   database: db,
+            //   statements: `
+            //       DELETE FROM programacion_trabajadores WHERE programacionId = ${datos.id};
+            //     `
+            // });
 
             if (Array.isArray(datos.trabajadores)) {
               await CapacitorSQLite.execute({
@@ -476,7 +476,7 @@ export class ProgramacionService {
                 });
               }
             }
-          }            
+          }
         }
       }
     } catch (error) {
@@ -538,38 +538,38 @@ export class ProgramacionService {
               ]
             }]
           });
-
-          // 👉 Insertar en tabla "programacion_trabajadores"
-          // if (Array.isArray(datos.trabajadores)) {
-
-
-          //   //Borramos datos por  ${datos.id} para asegurarnos de que no hay datos por esa programacion
-          //   await CapacitorSQLite.execute({
-          //     database: db,
-          //     statements: `
-          //         DELETE FROM programacion_trabajadores WHERE programacionId = ${datos.id};
-          //       `
-          //   });
-
-          //   if (Array.isArray(datos.trabajadores)) {
-          //     await CapacitorSQLite.execute({
-          //       database: db,
-          //       statements: `DELETE FROM programacion_trabajadores WHERE programacionId = ${datos.id};`
-          //     });
-          //     for (const trabajador of datos.trabajadores) {
-          //       await CapacitorSQLite.executeSet({
-          //         database: db,
-          //         set: [{
-          //           statement: `
-          //             INSERT INTO programacion_trabajadores (programacionId, trabajadorId, sincronizado)
-          //             VALUES (?, ?, ?);`,
-          //           values: [datos.id, trabajador.trabajadorId, 0]
-          //         }]
-          //       });
-          //     }
-          //   }
-          // }            
         }
+
+        if (Array.isArray(datos.trabajadores)) {
+          const trabajadoresConvertidos = datos.trabajadores.map(t => ({
+            trabajadorId: t.trabajadorId ?? t.id
+          }));
+        
+          for (const trabajador of trabajadoresConvertidos) {
+            if (trabajador.trabajadorId != null) {
+              await CapacitorSQLite.executeSet({
+                database: db,
+                set: [{
+                  statement: `
+                    INSERT INTO programacion_trabajadores (programacionId, trabajadorId, sincronizado)
+                    VALUES (?, ?, ?);`,
+                  values: [datos.id, trabajador.trabajadorId, 1]
+                }]
+              });
+            } else {
+              console.warn(`Trabajador inválido para la programación ${datos.id}:`, trabajador);
+            }
+          }
+        }      
+        
+        console.log('Programación insertada en VPS local:', {
+          id: datos.id,
+          programacion: datos.programacion,
+          fecha: datos.fecha,
+          fincaId: datos.fincaId,
+          actividadId: datos.actividadId,
+          trabajadores: datos.trabajadores || []
+        });
       }
     } catch (error) {
       console.error('Error al crear nuevos datos: ', error);
