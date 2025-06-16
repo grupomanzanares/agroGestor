@@ -225,16 +225,6 @@
             </form>
           </ion-item>
 
-          <!-- Select Trabajador
-          <ion-item class="ion-margin-top" *ngIf="+selectedProgramacion?.controlPorTrabajador === 1">
-            <ion-select interface="popover" placeholder="Selecciona un trabajador" formControlName="trabajador"
-              interface="popover">
-              <ion-select-option *ngFor="let trabajador of trabajadores" [value]="trabajador.id">
-                {{ trabajador.nombre }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item> -->
-
           <ion-item class="ion-margin-top" *ngIf="+selectedProgramacion?.controlPorTrabajador === 1">
             <ion-label position="stacked">Buscar Trabajador</ion-label>
             <ion-input
@@ -248,7 +238,7 @@
           </ion-item>                 
 
           <ion-list *ngIf="trabajadoresFilter.length > 0 && searchTrabajador">
-            <ion-item *ngFor="let item of trabajadoresFilter" (click)="selectTrabajador(item)">
+            <ion-item *ngFor="let item of trabajadoresFilter" (click)="selectTrabajador(item)" >
               {{ item.nombre }}
             </ion-item>
           </ion-list>   
@@ -290,7 +280,8 @@
           <ion-row>
             <ion-col size="6">
               <ion-button expand="block" color="primary"
-                (click)="create(selectedProgramacion.id)">Guardar</ion-button>
+                (click)="create(selectedProgramacion.id)"
+                [disabled]="inputs.invalid || !validarLotesSeleccionados() || !validarTrabajadoresSeleccionados()">Guardar</ion-button>
             </ion-col>
             <ion-col size="6">
               <ion-button expand="block" color="danger" (click)="onCloseForm()">Cancelar</ion-button>

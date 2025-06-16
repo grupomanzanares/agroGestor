@@ -204,6 +204,16 @@ export class ProgramacionPage implements OnInit {
     console.log("Lotes seleccionados:", this.form.get('lote').value);
   }
 
+  validarLotesSeleccionados(): boolean {
+    return Object.keys(this.form.controls)
+      .filter(key => key.startsWith('lote_') && this.form.get(key)?.value)
+      .length > 0;
+  }
+
+  validarTrabajadoresSeleccionados(): boolean {
+    return this.trabajadoresSeleccionados.length > 0;
+  }
+
   onCloseForm() {
     this.seguimiento = false; // Ocultar el formulario
     this.selectedProgramacion = null
@@ -224,7 +234,7 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
-  
+
 
   async getSeguimiento(id: number) {
     try {
@@ -248,7 +258,7 @@ export class ProgramacionPage implements OnInit {
     if (!trabajadores || trabajadores.length === 0) return 'Sin trabajadores';
     return trabajadores.map(t => t.nombre).join(', ');
   }
-  
+
 
   async getEstado() {
     try {
@@ -274,7 +284,7 @@ export class ProgramacionPage implements OnInit {
       console.error('Error al obtener fincas:', error);
     }
   }
-  
+
   async getLotes() {
     try {
       this.lotes = await this.lotesService.obtenerDtLocal('fincalotes') || []
@@ -324,11 +334,11 @@ export class ProgramacionPage implements OnInit {
     if (this.filterPriori) {
       this.filteredProgramaciones = this.filteredProgramaciones.filter(p => p.prioridadNombre === this.filterPriori);
     }
-  
+
     if (this.filterFinca) {
       this.filteredProgramaciones = this.filteredProgramaciones.filter(p => p.fincaNombre === this.filterFinca);
     }
-  
+
     if (!this.filterPriori && !this.filterFinca) {
       this.toastService.presentToast('No has seleccionado ningún filtro', 'danger', 'top');
     }
@@ -398,7 +408,7 @@ export class ProgramacionPage implements OnInit {
   async verificarTrabajadores() {
     const datos = await this.promaTrabajador.obtenerLocal('programacion_trabajadores');
     console.log(datos);
-  }  
+  }
 
   //Funciion para guardar el proceso y los comentarios  en que va la programacion
   saveChange(programacion: any) {
@@ -446,9 +456,20 @@ export class ProgramacionPage implements OnInit {
       return;
     }
 
-    if (this.inputs.invalid) {
+    if (this.inputs.invalid || !this.validarLotesSeleccionados() || !this.validarTrabajadoresSeleccionados()) {
+      this.toastService.presentToast('Por favor completa todos los campos obligatorios', 'danger', 'top');
+
+      // Marca todos como tocados para mostrar errores
       this.inputs.markAllAsTouched();
-      this.toastService.presentToast('Por favor completa los campos obligatorios', 'danger', 'top');
+
+      if (!this.validarLotesSeleccionados()) {
+        this.toastService.presentToast('Selecciona al menos un lote', 'danger', 'top');
+      }
+
+      if (!this.validarTrabajadoresSeleccionados()) {
+        this.toastService.presentToast('Selecciona al menos un trabajador', 'danger', 'top');
+      }
+
       return;
     }
 
@@ -457,7 +478,7 @@ export class ProgramacionPage implements OnInit {
     // const ultimoRegistro = registrosRelacionados.length > 0 ? Math.max(...registrosRelacionados.map(prog => prog.id)) : baseProgramacionId * 1000;
     // const nuevoId = ultimoRegistro + 1; // Generar nuevo ID consecutivo
 
-    const nuevoIdEjecucion = await this.programacionService.getMaxEjecucion('programacion',  baseProgramacionId, -1)
+    const nuevoIdEjecucion = await this.programacionService.getMaxEjecucion('programacion', baseProgramacionId, -1)
 
 
     // Calcular la suma de las cantidades de programaciones relacionadas
@@ -496,11 +517,11 @@ export class ProgramacionPage implements OnInit {
       actividadId: baseProgramacion.actividadId,
       estadoId: nuevoEstadoId, // Usar el estado calculado
       prioridadId: baseProgramacion.prioridadId,
-      trabajadores: this.trabajadoresSeleccionados.map(t => ({ trabajadorId: t.id}))
+      trabajadores: this.trabajadoresSeleccionados.map(t => ({ trabajadorId: t.id }))
     };
 
     console.log(nuevaProgramacion)
-    
+
     try {
       const actualizaciones: Programacion[] = [];
 
@@ -535,7 +556,7 @@ export class ProgramacionPage implements OnInit {
             usuarioMod: localStorage.getItem('userName')
           });
         });
-        
+
         // También actualizar la programación original
         actualizaciones.push({
           ...baseProgramacion,
@@ -554,14 +575,14 @@ export class ProgramacionPage implements OnInit {
         trabajadorId: t.trabajadorId,
         sincronizado: 0
       })), 'programacion_trabajadores');
-      
+
       console.log([nuevaProgramacion])
       console.log(this.verificarTrabajadores())
 
       this.toastService.presentToast('Registro realizado', 'success', 'top');
       this.getprogramacion(); // Actualizar la lista de programaciones
       this.inputs.reset();
-      this.trabajadoresSeleccionados = []; 
+      this.trabajadoresSeleccionados = [];
       this.searchTrabajador = '';
       this.onCloseForm();
     } catch (error) {

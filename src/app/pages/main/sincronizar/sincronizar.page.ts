@@ -6,6 +6,7 @@ import { EstadoService } from 'src/app/services/estado.service';
 import { FincaService } from 'src/app/services/finca.service';
 import { FincaslotesService } from 'src/app/services/fincaslotes.service';
 import { IdentificacionService } from 'src/app/services/identificacion.service';
+import { LoadingService } from 'src/app/services/loading.service';
 import { PrioridadService } from 'src/app/services/prioridad.service';
 import { ProgramacionService } from 'src/app/services/programacion.service';
 import { PromatrabajadorService } from 'src/app/services/promatrabajador.service';
@@ -55,7 +56,8 @@ export class SincronizarPage implements OnInit {
     private trabajadorService: TrabajadorService,
     private identificacionService: IdentificacionService,
     private uploadDataService: UploadDataService,
-    private proma_trabajadorService: PromatrabajadorService
+    private proma_trabajadorService: PromatrabajadorService,
+    private loadingService: LoadingService
   ) { }
 
   ngOnInit() {
@@ -103,6 +105,7 @@ export class SincronizarPage implements OnInit {
 
       if ((await conexion).connected) {
         const token = localStorage.getItem('token')
+        this.loadingService.showLoading()
 
         if (!token) {
           console.error('No se encontró un token. Asegúrate de que el usuario haya iniciado sesión.');
@@ -127,6 +130,8 @@ export class SincronizarPage implements OnInit {
         // await this.proma_trabajadorService.descargarDatosVps('programacion_trabajadores', 'programacion_trabajadores')
         
         await this.cargar();
+        this.loadingService.hideLoading()
+        this.toasService.presentToast('Sincronización completada exitosamente', 'success', 'top')
         console.log('Sincronización completada exitosamente.');
       } else {
         this.toasService.presentToast('Debes tener conexión a internet para hacer esto', 'danger', 'top')
@@ -140,6 +145,7 @@ export class SincronizarPage implements OnInit {
 
   async subirDatos() {
     const conexion = Network.getStatus();
+    this.loadingService.showLoading()
     try {
       if ((await conexion).connected) {
         
@@ -154,6 +160,7 @@ export class SincronizarPage implements OnInit {
         } else {
           this.toasService.presentToast('No hubo cambios para sincronizar', 'warning', 'top');
         }
+        this.loadingService.hideLoading()
 
       } else {
         this.toasService.presentToast('Debes tener conexión a internet para hacer esto', 'danger', 'top');
