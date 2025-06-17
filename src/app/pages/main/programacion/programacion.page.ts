@@ -456,18 +456,14 @@ export class ProgramacionPage implements OnInit {
       return;
     }
 
-    if (this.inputs.invalid || !this.validarLotesSeleccionados() || !this.validarTrabajadoresSeleccionados()) {
+    if (this.inputs.invalid || !this.validarTrabajadoresSeleccionados()) {
       this.toastService.presentToast('Por favor completa todos los campos obligatorios', 'danger', 'top');
 
       // Marca todos como tocados para mostrar errores
       this.inputs.markAllAsTouched();
 
-      if (!this.validarLotesSeleccionados()) {
-        this.toastService.presentToast('Selecciona al menos un lote', 'danger', 'top');
-      }
-
       if (!this.validarTrabajadoresSeleccionados()) {
-        this.toastService.presentToast('Selecciona al menos un trabajador', 'danger', 'top');
+        await this.toastService.presentToast('Selecciona al menos un trabajador', 'danger', 'top');
       }
 
       return;
