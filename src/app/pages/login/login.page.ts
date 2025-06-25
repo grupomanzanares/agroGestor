@@ -73,9 +73,10 @@ export class LoginPage implements OnInit {
       next: async (response) => {
         if (response.token) {
           const userName = response.user?.name || 'Usuario';
+          const id = response.user?.id || 'id'
           this.toastService.presentToast(`Bienvenid@ ${userName}`, 'success', 'top');
           await this.loadinService.hideLoading();
-          this.auth.saveToken(response.token, userName);
+          this.auth.saveToken(response.token, userName, id);
           this.router.navigate(['main']);
           this.loginFrom.reset()
         } else {

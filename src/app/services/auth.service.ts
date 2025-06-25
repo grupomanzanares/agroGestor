@@ -25,9 +25,10 @@ export class AuthService {
     );
   }
 
-  saveToken(token: string, userName: string): void {
+  saveToken(token: string, userName: string, id: string): void {
     localStorage.setItem('token', token);
     localStorage.setItem('userName', userName)
+    localStorage.setItem('id', id)
   }
 
   logout(): void {

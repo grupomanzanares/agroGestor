@@ -5,6 +5,7 @@ import { SqliteManagerService } from './sqlite-manager.service';
 import { forkJoin, from, lastValueFrom, map, Observable } from 'rxjs';
 import { Programacion } from '../models/programacion';
 import { CapacitorSQLite } from '@capacitor-community/sqlite';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,14 +14,15 @@ export class ProgramacionService {
 
   apiUrl = environment.apiUrl
 
-  constructor(private http: HttpClient, private sqlService: SqliteManagerService) { }
+  constructor(private http: HttpClient, private sqlService: SqliteManagerService, private auth: AuthService) { }
 
   obternerVps(endPoint: string): Observable<Programacion[]> {
     const token = localStorage.getItem('token')
+    const id = localStorage.getItem('id')
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     })
-    return this.http.get<Programacion[]>(`${this.apiUrl}${endPoint}`, { headers })
+    return this.http.get<Programacion[]>(`${this.apiUrl}${endPoint}/recientes?responsableId=${id}`, { headers })
   }
 
   async obtenerLocal(tabla: string): Promise<Programacion[]> {
@@ -544,7 +546,7 @@ export class ProgramacionService {
           const trabajadoresConvertidos = datos.trabajadores.map(t => ({
             trabajadorId: t.trabajadorId ?? t.id
           }));
-        
+
           for (const trabajador of trabajadoresConvertidos) {
             if (trabajador.trabajadorId != null) {
               await CapacitorSQLite.executeSet({
@@ -560,8 +562,8 @@ export class ProgramacionService {
               console.warn(`Trabajador inválido para la programación ${datos.id}:`, trabajador);
             }
           }
-        }      
-        
+        }
+
         console.log('Programación insertada en VPS local:', {
           id: datos.id,
           programacion: datos.programacion,

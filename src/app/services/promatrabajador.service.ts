@@ -222,6 +222,4 @@ export class PromatrabajadorService {
       throw error;
     }
   }
-  
-
 }
