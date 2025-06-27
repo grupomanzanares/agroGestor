@@ -183,6 +183,7 @@ export class ProgramacionService {
       sql += ` AND p.programacion = ?`;
       values.push(programacionId);
     }
+    console.log('Values', values)
 
     const db = await this.sqlService.getDbName();
 
@@ -192,6 +193,9 @@ export class ProgramacionService {
         statement: sql,
         values: values
       });
+
+      console.log('SQL', sql)
+      console.log('Response', response)
 
       if (response.values && response.values.length > 0) {
         const mesActual = new Date().getMonth() + 1;
@@ -315,12 +319,12 @@ export class ProgramacionService {
 
 
   async update(datosDiferentes: Programacion[], tabla: string) {
-    console.log('Datos diferentes recibidos para actualizar:', JSON.stringify(datosDiferentes))
+    console.log('Datos diferentes recibidos para actualizar:', datosDiferentes)
     if (datosDiferentes.length === 0) {
       console.log(`No hay datos diferente para actualizar`)
       return
     }
-    const sql = `UPDATE ${tabla} SET fecha=?, lote=?, jornal=?, cantidad=?, habilitado=?, sincronizado=?, fecSincronizacion=?, observacion=?, signo=?, maquina=?, usuario=?, usuarioMod=?, createdAt=?, updatedAt=?, sucursalId=?, fincaId=?, actividadId=?, estadoId=?, prioridadId=? WHERE id = ?`
+    const sql = `UPDATE ${tabla} SET fecha=?, programacion=?, lote=?, trabajador=?, jornal=?, cantidad=?, habilitado=?, sincronizado=?, fecSincronizacion=?, observacion=?, signo=?, maquina=?, usuario=?, usuarioMod=?, createdAt=?, updatedAt=?, sucursalId=?, fincaId=?, actividadId=?, estadoId=?, prioridadId=? WHERE id = ?`
     const db = await this.sqlService.getDbName()
 
     try {
@@ -390,7 +394,7 @@ export class ProgramacionService {
         }
       }
     } catch (error) {
-      console.error('Error al actualizar las categorias')
+      console.error('Error al actualizar las programadores', error)
     }
   }
 

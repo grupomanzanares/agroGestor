@@ -105,7 +105,6 @@ export class SincronizarPage implements OnInit {
 
       if ((await conexion).connected) {
         const token = localStorage.getItem('token')
-        this.loadingService.showLoading()
 
         if (!token) {
           console.error('No se encontró un token. Asegúrate de que el usuario haya iniciado sesión.');
@@ -126,11 +125,10 @@ export class SincronizarPage implements OnInit {
         await this.estadoService.sincronizar('estado', 'estado')
         await this.loteService.sincronizarLote('fincalote', 'fincalotes');
         await this.identificacionService.sincronizar('tiposidentificacion', 'tp_identificacion'),
-        await this.trabajadorService.sincronizar('trabajador', "trabajador")
+          await this.trabajadorService.sincronizar('trabajador', "trabajador")
         // await this.proma_trabajadorService.descargarDatosVps('programacion_trabajadores', 'programacion_trabajadores')
-        
+
         await this.cargar();
-        this.loadingService.hideLoading()
         this.toasService.presentToast('Sincronización completada exitosamente', 'success', 'top')
         console.log('Sincronización completada exitosamente.');
       } else {
@@ -145,22 +143,21 @@ export class SincronizarPage implements OnInit {
 
   async subirDatos() {
     const conexion = Network.getStatus();
-    this.loadingService.showLoading()
     try {
       if ((await conexion).connected) {
-        
+
         console.log("Iniciando subida de datos...");
-        
+
         // Llamar a la función de sincronización del `UploadDataService`
         const sincronizacionExitosa = await this.uploadDataService.sincronizacion('programacion', 'programacion');
         await this.proma_trabajadorService.sincronizar('programacion_trabajadores', 'programacion_trabajadores')
 
         if (sincronizacionExitosa) {
           this.toasService.presentToast('Datos subidos correctamente', 'success', 'top');
+          console.log('Datos subidos', sincronizacionExitosa)
         } else {
-          this.toasService.presentToast('No hubo cambios para sincronizar', 'warning', 'top');
+          this.toasService.presentToast('No hubo cambios para subir', 'warning', 'top');
         }
-        this.loadingService.hideLoading()
 
       } else {
         this.toasService.presentToast('Debes tener conexión a internet para hacer esto', 'danger', 'top');
@@ -169,5 +166,12 @@ export class SincronizarPage implements OnInit {
       console.error('Error al subir datos:', error);
       this.toasService.presentToast('Error al subir datos', 'danger', 'top');
     }
+  }
+  
+  async sincronizar() {
+    this.loadingService.showLoading();
+    await this.subirDatos();
+    await this.traerDatos();
+    this.loadingService.hideLoading();
   }
 }

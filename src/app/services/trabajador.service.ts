@@ -102,7 +102,7 @@ export class TrabajadorService {
       return
     }
     const db = await this.sqlManajer.getDbName()
-    const sql = `UPDATE ${tabla} SET nit=?, nombre=?, habilitado=?, observacion==?, usuario=?, usuarioMod=?, createdAt=?, updatedAt=?, tipoIdentificacion=?, WHERE id = ?`
+    const sql = `UPDATE ${tabla} SET nit=?, nombre=?, habilitado=?, observacion=?, usuario=?, usuarioMod=?, createdAt=?, updatedAt=?, tipoIdentificacion=? WHERE id = ?`
   
     try {
       for (const datos of datosDiferentes) {
@@ -127,7 +127,7 @@ export class TrabajadorService {
                 datos.nit || null, 
                 datos.nombre || null,
                 datos.habilitado || null,
-                datos.observacion || null,,
+                datos.observacion || null,
                 datos.usuario || null,
                 datos.usuarioMod || null,
                 datos.createdAt || null,

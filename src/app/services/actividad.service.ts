@@ -104,13 +104,13 @@ export class ActividadService {
   }
 
   async update(datosDiferentes: Actividad[], tabla: string) {
-    console.log(`Datos diferentes recibidos para actualizar: ${datosDiferentes}`)
+    console.log('Datos diferentes recibidos para actualizar:', datosDiferentes)
     if (datosDiferentes.length === 0) {
       console.log(`No hay datos diferentes para actualizar`)
       return
     }
     const db = await this.sqlManagerService.getDbName()
-    const sql = `UPDATE ${tabla} SET nombre=?, descripcion=?, controlPorLote?, habilitado=?, usuario=?, usuarioMod=?, createdAt=?, updatedAt=?, unidadId=?, subCategoriaId=? WHERE id = ?`
+    const sql = `UPDATE ${tabla} SET nombre=?, descripcion=?, controlPorLote=?, controlPorTrabajador=?, habilitado=?, usuario=?, usuarioMod=?, createdAt=?, updatedAt=?, unidadId=?, subCategoriaId=? WHERE id = ?`
 
     try {
       for (const datos of datosDiferentes) {
