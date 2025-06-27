@@ -44,7 +44,7 @@ export class ProgramacionPage implements OnInit {
   searchTrabajador: string = ''
   trabajadoresSeleccionados: any[] = [];
   usuarioLogeo = localStorage.getItem('userName')
-  usuarioLogeoId = localStorage.getItem('id')
+  //usuarioLogeoId = localStorage.getItem('userName')
 
 
   public inputs = new FormGroup<{ [key: string]: AbstractControl<any, any> }>({
@@ -228,7 +228,7 @@ export class ProgramacionPage implements OnInit {
   async getprogramacion() {
     try {
       console.log("usuario logueado:", this.usuarioLogeo)
-      this.programaciones = await this.programacionService.getProgramaciones('programacion', this.usuarioLogeoId, null, 1);
+      this.programaciones = await this.programacionService.getProgramaciones('programacion',  null, 1);
       this.filteredProgramaciones = [...this.programaciones];
       console.log(this.filteredProgramaciones)
     } catch (error) {
@@ -236,14 +236,7 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
-  async getProgramacionUsuario(usuario: string) {
-    try {
-      console.log("usuario logueado:", usuario)
-      this.filteredProgramaciones = await this.programacionService.getProgramaciones('programacion', usuario, null, 1);
-    } catch (error) {
-      console.error('Error al obtener programaciones:', error);
-    }
-  }
+
 
   async getSeguimiento(id: number) {
     try {
@@ -252,7 +245,7 @@ export class ProgramacionPage implements OnInit {
         return;
       }
 
-      this.seguimientos = await this.programacionService.getProgramaciones('programacion', null, id, -1);
+      this.seguimientos = await this.programacionService.getProgramaciones('programacion',  id, -1);
       this.filterSeguimiento = [...this.seguimientos];
 
       console.log("Programaciones en seguimiento:", this.seguimientos);
@@ -473,7 +466,7 @@ export class ProgramacionPage implements OnInit {
     }
 
     // Calcular el nuevo ID basado en el ID original
-    const registrosRelacionados = await this.programacionService.getProgramaciones('programacion', null, baseProgramacionId, -1)
+    const registrosRelacionados = await this.programacionService.getProgramaciones('programacion',  baseProgramacionId, -1)
     // const ultimoRegistro = registrosRelacionados.length > 0 ? Math.max(...registrosRelacionados.map(prog => prog.id)) : baseProgramacionId * 1000;
     // const nuevoId = ultimoRegistro + 1; // Generar nuevo ID consecutivo
 

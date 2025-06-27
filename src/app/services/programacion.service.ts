@@ -117,7 +117,7 @@ export class ProgramacionService {
   }
 
 
-  async getProgramaciones(tabla: string, usuario: string | null = null, programacionId: number | null = null, signo: number | null = null): Promise<any[]> {
+  async getProgramaciones(tabla: string,  programacionId: number | null = null, signo: number | null = null): Promise<any[]> {
     let sql = `
       SELECT 
         p.id,
@@ -174,10 +174,10 @@ export class ProgramacionService {
       values.push(signo);
     }
 
-    if (usuario !== null) {
-      sql += ` AND p.responsableId = ?`;
-      values.push(usuario);
-    }
+    //if (usuario !== null) {
+      //sql += ` AND p.responsableId = ?`;
+      //values.push(usuario);
+    //}
 
     if (programacionId !== null) {
       sql += ` AND p.programacion = ?`;
