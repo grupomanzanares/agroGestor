@@ -44,6 +44,7 @@ export class ProgramacionPage implements OnInit {
   searchTrabajador: string = ''
   trabajadoresSeleccionados: any[] = [];
   usuarioLogeo = localStorage.getItem('userName')
+  usuarioLogeoId = localStorage.getItem('id')
 
 
   public inputs = new FormGroup<{ [key: string]: AbstractControl<any, any> }>({
@@ -78,7 +79,7 @@ export class ProgramacionPage implements OnInit {
     this.form = new FormGroup({
       seleccionarTodos: new FormControl(false)
     });
-    this.getProgramacionUsuario(this.usuarioLogeo)
+    //this.getProgramacionUsuario(this.usuarioLogeo)
     // this.getNombresTrabajadores()
   }
 
@@ -226,7 +227,8 @@ export class ProgramacionPage implements OnInit {
 
   async getprogramacion() {
     try {
-      this.programaciones = await this.programacionService.getProgramaciones('programacion', this.usuarioLogeo, null, 1);
+      console.log("usuario logueado:", this.usuarioLogeo)
+      this.programaciones = await this.programacionService.getProgramaciones('programacion', this.usuarioLogeoId, null, 1);
       this.filteredProgramaciones = [...this.programaciones];
       console.log(this.filteredProgramaciones)
     } catch (error) {
@@ -234,7 +236,14 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
-
+  async getProgramacionUsuario(usuario: string) {
+    try {
+      console.log("usuario logueado:", usuario)
+      this.filteredProgramaciones = await this.programacionService.getProgramaciones('programacion', usuario, null, 1);
+    } catch (error) {
+      console.error('Error al obtener programaciones:', error);
+    }
+  }
 
   async getSeguimiento(id: number) {
     try {
@@ -388,13 +397,7 @@ export class ProgramacionPage implements OnInit {
     }
   }
 
-  async getProgramacionUsuario(usuario: string) {
-    try {
-      this.filteredProgramaciones = await this.programacionService.getProgramaciones('programacion', usuario, null, 1);
-    } catch (error) {
-      console.error('Error al obtener programaciones:', error);
-    }
-  }
+ 
 
   nullestados(programacion: Programacion): Estado[] {
     if (!programacion || !programacion.estadoId) {

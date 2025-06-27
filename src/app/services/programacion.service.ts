@@ -175,7 +175,7 @@ export class ProgramacionService {
     }
 
     if (usuario !== null) {
-      sql += ` AND u.name = ?`;
+      sql += ` AND p.responsableId = ?`;
       values.push(usuario);
     }
 
@@ -256,8 +256,10 @@ export class ProgramacionService {
       map(result => {
         const { vpsDatos, localDatos } = result;
 
-        // console.log('Datos del VPS:', vpsDatos);
-        // console.log('Datos locales:', localDatos);
+         // LOGS DETALLADOS
+         console.log('--- SINCRONIZACIÓN ---');
+         console.log('Datos del VPS:', vpsDatos);
+         console.log('Datos locales:', localDatos);
 
         if (localDatos.length === 0) {
           console.log('No hay datos locales, todos los datos del VPS serán creados.');
@@ -318,7 +320,7 @@ export class ProgramacionService {
   }
 
 
-  async update(datosDiferentes: Programacion[], tabla: string) {
+  async updateOnCelphone(datosDiferentes: Programacion[], tabla: string) {
     console.log('Datos diferentes recibidos para actualizar:', datosDiferentes)
     if (datosDiferentes.length === 0) {
       console.log(`No hay datos diferente para actualizar`)
@@ -490,7 +492,8 @@ export class ProgramacionService {
     }
   }
 
-  async createVPS(datosParaCrear: Programacion[], tabla: string) {
+  async createOnCelphone(datosParaCrear: Programacion[], tabla: string) {
+    /** Insertar localmente programaciones nuevas que no esten en el cular */
     const db = await this.sqlService.getDbName();
     const sql = `INSERT INTO ${tabla} 
       (id, programacion, fecha, lote, jornal, cantidad, habilitado, sincronizado, fecSincronizacion, observacion, signo, maquina, usuario, usuarioMod, createdAt, updatedAt, sucursalId, responsableId, fincaId, actividadId, estadoId, prioridadId) 
@@ -587,22 +590,22 @@ export class ProgramacionService {
       const { update, create } = await lastValueFrom(this.comparacion(endPoint, tabla))
 
       if (update.length > 0) {
-        await this.update(update, tabla)
-        console.log(`Programacion actualizada con exito`)
+        await this.updateOnCelphone(update, tabla)
+        console.log(`Programacion actualizada con exito en el celular`)
       } else {
-        console.log(`No hay datos que actualizar`)
+        console.log(`No hay programaciones que actualizar en el celular`)
       }
 
       if (create.length > 0) {
-        await this.createVPS(create, tabla)
-        console.log('Datos de la programacion insertados correctamente')
+        await this.createOnCelphone(create, tabla)
+        console.log('Datos de la programacion creados correctamente en el celular')
       }
 
       if (update.length === 0 && create.length === 0) {
-        console.log('No hay cambios para aplicar')
+        console.log('No hay programaciones para crear o modificar en el celular')
       }
     } catch (error) {
-      console.error(`Error en la sincronizacion: ${error}`)
+      console.error(`Error en la sincronizacion de programacion en el celular: ${error}`)
     }
   }
 
